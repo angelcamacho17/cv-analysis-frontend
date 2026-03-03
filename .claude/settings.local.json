@@ -1,0 +1,35 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run dev)",
+      "Bash(node --version)",
+      "Bash(nvm install 20.19)",
+      "Bash(nvm use 20.19)",
+      "Bash(source ~/.nvm/nvm.sh)",
+      "Bash(npx tsc --noEmit)",
+      "Bash(curl -s http://localhost:5173/)",
+      "Bash(curl -s http://localhost:5173/src/index.css)",
+      "Bash(curl -X OPTIONS https://cv-analysis-api.onrender.com/api/cv-analysis/job-positions -H \"Access-Control-Request-Method: GET\" -H \"Access-Control-Request-Headers: authorization\" -H \"Origin: http://localhost:5173\" -v)",
+      "Bash(lsof -ti:5173)",
+      "Bash(xargs kill -9)",
+      "Bash(curl -s http://localhost:5173/api/cv-analysis/job-positions?active=true -H \"Authorization: Bearer mvp-admin-9b5c1fa4c5eec52b423aae33627225bbf02f768a2f117eb4\")",
+      "Bash(curl -s 'http://localhost:5173/api/cv-analysis/job-positions?active=true' -H \"Authorization: Bearer mvp-admin-9b5c1fa4c5eec52b423aae33627225bbf02f768a2f117eb4\")",
+      "Bash(lsof -i :5173 -i :5175)",
+      "Bash(lsof -ti:5173 -ti:5175)",
+      "Bash(cat .env)",
+      "Bash(curl -s https://cv-analysis-api.onrender.com/api/cv-analysis/job-positions?active=true -H \"Authorization: Bearer mvp-admin-9b5c1fa4c5eec52b423aae33627225bbf02f768a2f117eb4\")",
+      "Bash(curl -s 'https://cv-analysis-api.onrender.com/api/cv-analysis/job-positions?active=true' -H \"Authorization: Bearer mvp-admin-9b5c1fa4c5eec52b423aae33627225bbf02f768a2f117eb4\")",
+      "Bash(curl -s 'https://cv-analysis-api.onrender.com/api/cv-analysis/job-positions?active=true' -H \"Authorization: Bearer mvp-admin-9b5c1fa4c5eec52b423aae33627225bbf02f768a2f117eb4\" -v)",
+      "Bash(lsof -ti:5173 -ti:5174 -ti:5175)",
+      "Bash(curl -s -X POST 'https://cv-analysis-api.onrender.com/api/login' -H \"Content-Type: application/json\" -d '{\"\"\"\"token\"\"\"\":\"\"\"\"f7014ba0103ac7d68f13d82e672ccadb43dc5b0c0048c85bce286710621ace39\"\"\"\"}')",
+      "Bash(curl -s -X POST https://cv-analysis-api.onrender.com/api/login -H \"Content-Type: application/json\" -d \"{\"\"token\"\":\"\"f7014ba0103ac7d68f13d82e672ccadb43dc5b0c0048c85bce286710621ace39\"\"}\")",
+      "Bash(curl -s https://cv-analysis-api.onrender.com/api/cv-analysis/job-positions?active=true -H \"Authorization: Bearer f7014ba0103ac7d68f13d82e672ccadb43dc5b0c0048c85bce286710621ace39\")",
+      "Bash(curl -s \"https://cv-analysis-api.onrender.com/api/cv-analysis/job-positions?active=true\" -H \"Authorization: Bearer f7014ba0103ac7d68f13d82e672ccadb43dc5b0c0048c85bce286710621ace39\")",
+      "Bash(curl -s \"https://cv-analysis-api.onrender.com/api/job-positions?active=true\" -H \"Authorization: Bearer f7014ba0103ac7d68f13d82e672ccadb43dc5b0c0048c85bce286710621ace39\")",
+      "Bash(lsof -i :5173 -i :5174 -i :5175)",
+      "Bash(kill -9 37892)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
