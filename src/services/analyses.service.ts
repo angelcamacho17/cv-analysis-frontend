@@ -5,6 +5,12 @@
  */
 
 import { apiGet } from './api-client';
+import {
+  transformStatistics,
+  transformCandidate,
+  transformAnalysisSummary,
+  transformAnalysisDetail,
+} from '../utils/analyses-transformer';
 import type {
   AnalysesListResponse,
   AnalysisDetailResponse,
@@ -21,14 +27,27 @@ export const getAnalyses = async (
   page: number = 1,
   limit: number = 10
 ): Promise<AnalysesListResponse> => {
-  return apiGet<AnalysesListResponse>(`/analyses?page=${page}&limit=${limit}`);
+  const response = await apiGet<any>(`/analyses?page=${page}&limit=${limit}`);
+
+  // Transform snake_case backend response to camelCase frontend format
+  return {
+    success: response.success,
+    data: response.analyses.map(transformAnalysisSummary),
+    pagination: response.pagination,
+  };
 };
 
 /**
  * Gets full details of a specific analysis
  */
 export const getAnalysisDetail = async (id: string): Promise<AnalysisDetailResponse> => {
-  return apiGet<AnalysisDetailResponse>(`/analyses/${id}`);
+  const response = await apiGet<any>(`/analyses/${id}`);
+
+  // Transform snake_case backend response to camelCase frontend format
+  return {
+    success: response.success,
+    data: transformAnalysisDetail(response),
+  };
 };
 
 /**
@@ -47,20 +66,36 @@ export const searchCandidates = async (
   if (params.analysisId) queryParams.append('analysisId', params.analysisId);
   if (params.limit) queryParams.append('limit', params.limit.toString());
 
-  return apiGet<CandidateSearchResponse>(`/candidates/search?${queryParams.toString()}`);
+  const response = await apiGet<any>(`/candidates/search?${queryParams.toString()}`);
+
+  // Transform snake_case backend response to camelCase frontend format
+  return {
+    success: response.success,
+    data: (response.candidates || response.data || []).map(transformCandidate),
+    total: response.total || response.count || 0,
+  };
 };
 
 /**
  * Gets top-scoring candidates across all analyses
  */
 export const getTopCandidates = async (limit: number = 10): Promise<CandidateDetail[]> => {
-  const data = await apiGet<any>(`/candidates/top?limit=${limit}`);
-  return data.data || data;
+  const response = await apiGet<any>(`/candidates/top?limit=${limit}`);
+  const candidates = response.candidates || response.data || [];
+
+  // Transform snake_case backend response to camelCase frontend format
+  return candidates.map(transformCandidate);
 };
 
 /**
  * Gets global statistics
  */
 export const getStatistics = async (): Promise<StatisticsResponse> => {
-  return apiGet<StatisticsResponse>('/statistics');
+  const response = await apiGet<any>('/statistics');
+
+  // Transform snake_case backend response to camelCase frontend format
+  return {
+    success: response.success,
+    data: transformStatistics(response),
+  };
 };

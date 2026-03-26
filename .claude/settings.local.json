@@ -27,7 +27,11 @@
       "Bash(curl -s \"https://cv-analysis-api.onrender.com/api/cv-analysis/job-positions?active=true\" -H \"Authorization: Bearer f7014ba0103ac7d68f13d82e672ccadb43dc5b0c0048c85bce286710621ace39\")",
       "Bash(curl -s \"https://cv-analysis-api.onrender.com/api/job-positions?active=true\" -H \"Authorization: Bearer f7014ba0103ac7d68f13d82e672ccadb43dc5b0c0048c85bce286710621ace39\")",
       "Bash(lsof -i :5173 -i :5174 -i :5175)",
-      "Bash(kill -9 37892)"
+      "Bash(kill -9 37892)",
+      "Bash(curl -s \"https://cv-analysis-api.onrender.com/api/statistics\" -H \"Authorization: Bearer f7014ba0103ac7d68f13d82e672ccadb43dc5b0c0048c85bce286710621ace39\")",
+      "Bash(curl -s \"https://cv-analysis-api.onrender.com/api/candidates/top?limit=10\" -H \"Authorization: Bearer f7014ba0103ac7d68f13d82e672ccadb43dc5b0c0048c85bce286710621ace39\")",
+      "Bash(curl -s \"https://cv-analysis-api.onrender.com/api/analyses?page=1&limit=10\" -H \"Authorization: Bearer f7014ba0103ac7d68f13d82e672ccadb43dc5b0c0048c85bce286710621ace39\")",
+      "Bash(curl -s \"https://cv-analysis-api.onrender.com/api/analyses/2\" -H \"Authorization: Bearer f7014ba0103ac7d68f13d82e672ccadb43dc5b0c0048c85bce286710621ace39\")"
     ],
     "deny": [],
     "ask": []
