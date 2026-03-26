@@ -32,7 +32,8 @@
       "Bash(curl -s \"https://cv-analysis-api.onrender.com/api/candidates/top?limit=10\" -H \"Authorization: Bearer f7014ba0103ac7d68f13d82e672ccadb43dc5b0c0048c85bce286710621ace39\")",
       "Bash(curl -s \"https://cv-analysis-api.onrender.com/api/analyses?page=1&limit=10\" -H \"Authorization: Bearer f7014ba0103ac7d68f13d82e672ccadb43dc5b0c0048c85bce286710621ace39\")",
       "Bash(curl -s \"https://cv-analysis-api.onrender.com/api/analyses/2\" -H \"Authorization: Bearer f7014ba0103ac7d68f13d82e672ccadb43dc5b0c0048c85bce286710621ace39\")",
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "Bash(git add:*)"
     ],
     "deny": [],
     "ask": []

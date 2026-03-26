@@ -6,6 +6,7 @@
 import { useState, type FormEvent } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { environment } from '../../config/environment';
 
 export const LoginPage = () => {
   const [token, setToken] = useState('');
@@ -35,7 +36,7 @@ export const LoginPage = () => {
       }
 
       // Validate token with backend login API
-      const response = await fetch('/api/login', {
+      const response = await fetch(`${environment.apiUrl}/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -43,7 +44,8 @@ export const LoginPage = () => {
         body: JSON.stringify({ token: trimmedToken }),
       });
 
-      const data = await response.json();
+      const text = await response.text();
+      const data = text ? JSON.parse(text) : {};
 
       if (!response.ok) {
         throw new Error(data.error || 'Token inválido. Por favor verifica tu token de acceso.');
