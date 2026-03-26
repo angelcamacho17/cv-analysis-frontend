@@ -4,11 +4,10 @@
  * BREAKING CHANGE: Excel files are NO LONGER required or supported
  */
 
-import { environment } from '../config/environment';
-import { getAuthHeaders, apiFetch } from './api-client';
+import { apiFetch } from './api-client';
 import type { AnalysisResult, SSEEvent, FinalResult } from '../types/cv-analysis';
 
-const API_BASE = `${environment.apiUrl}`; // v4.0.0: Analysis endpoints are now at /api/analyze and /api/analyze-stream
+// v4.0.0: Analysis endpoints are now at /api/analyze and /api/analyze-stream
 
 /**
  * Analyzes CVs with real-time progress updates via Server-Sent Events

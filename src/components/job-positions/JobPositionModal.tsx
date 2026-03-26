@@ -3,7 +3,7 @@
  * Create/Edit job position form in a modal
  */
 
-import { useState, useEffect, KeyboardEvent } from 'react';
+import { useState, useEffect, type KeyboardEvent } from 'react';
 import { createJobPosition, updateJobPosition } from '../../services/job-positions.service';
 import { parseJobPosition } from '../../types/job-positions';
 import type { JobPosition, JobPositionCreateRequest, JobPositionUpdateRequest } from '../../types/job-positions';

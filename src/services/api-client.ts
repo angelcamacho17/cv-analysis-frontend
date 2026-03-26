@@ -57,7 +57,7 @@ export const apiFetch = async (
   };
 
   console.log(`🌐 API Request: ${options.method || 'GET'} ${url}`);
-  console.log(`🔑 Auth Header: ${headers['Authorization'] ? '✓ Bearer token present' : '✗ No token'}`);
+  console.log(`🔑 Auth Header: ${(headers as Record<string, string>)['Authorization'] ? '✓ Bearer token present' : '✗ No token'}`);
 
   try {
     const response = await fetch(url, config);
