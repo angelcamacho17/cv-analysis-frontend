@@ -136,13 +136,16 @@ export const AnalysisDetailPage = () => {
   };
 
   return (
-    <div className="p-4 sm:p-6 bg-gray-50 min-h-screen">
+    <div>
       {/* Back button */}
       <button
         onClick={goBack}
-        className="mb-4 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors flex items-center gap-2"
+        className="mb-6 inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
       >
-        <span>←</span> Volver
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Volver
       </button>
 
       {loading && (
@@ -161,48 +164,45 @@ export const AnalysisDetailPage = () => {
       {analysis && (
         <div>
           {/* Header */}
-          <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">{analysis.excelFilename}</h1>
-            <p className="text-gray-600 mb-4">📅 {new Date(analysis.analysisDate).toLocaleString()}</p>
+          <div className="bg-white rounded-xl border border-gray-200 p-6 sm:p-8 mb-6">
+            <h1 className="text-2xl font-bold text-gray-900 mb-1">{analysis.excelFilename}</h1>
+            <p className="text-sm text-gray-400 mb-6">{new Date(analysis.analysisDate).toLocaleString()}</p>
 
             {/* Summary Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-              <div className="text-center p-4 bg-blue-50 rounded-lg">
-                <div className="text-3xl font-bold text-blue-600">{analysis.summary.totalAnalizados}</div>
-                <div className="text-sm text-gray-600">Total Candidatos</div>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+              <div className="text-center p-5 bg-blue-50 rounded-xl">
+                <div className="text-3xl font-bold text-blue-600 mb-1">{analysis.summary.totalAnalizados}</div>
+                <div className="text-sm text-gray-500 font-medium">Total Candidatos</div>
               </div>
-              <div className="text-center p-4 bg-green-50 rounded-lg">
-                <div className="text-3xl font-bold text-green-600">{analysis.summary.paraEntrevistar}</div>
-                <div className="text-sm text-gray-600">Para Entrevistar</div>
+              <div className="text-center p-5 bg-green-50 rounded-xl">
+                <div className="text-3xl font-bold text-green-600 mb-1">{analysis.summary.paraEntrevistar}</div>
+                <div className="text-sm text-gray-500 font-medium">Para Entrevistar</div>
               </div>
-              <div className="text-center p-4 bg-yellow-50 rounded-lg">
-                <div className="text-3xl font-bold text-yellow-600">{analysis.summary.quizas}</div>
-                <div className="text-sm text-gray-600">Quizás</div>
+              <div className="text-center p-5 bg-amber-50 rounded-xl">
+                <div className="text-3xl font-bold text-amber-600 mb-1">{analysis.summary.quizas}</div>
+                <div className="text-sm text-gray-500 font-medium">Quizas</div>
               </div>
-              <div className="text-center p-4 bg-red-50 rounded-lg">
-                <div className="text-3xl font-bold text-red-600">{analysis.summary.descartados}</div>
-                <div className="text-sm text-gray-600">Descartados</div>
+              <div className="text-center p-5 bg-red-50 rounded-xl">
+                <div className="text-3xl font-bold text-red-500 mb-1">{analysis.summary.descartados}</div>
+                <div className="text-sm text-gray-500 font-medium">Descartados</div>
               </div>
             </div>
 
             {/* Top 3 */}
             {analysis.summary.top3.length > 0 && (
-              <div className="border-t pt-4">
-                <h2 className="text-xl font-bold mb-3">🏆 Top 3 Candidatos</h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="border-t border-gray-100 pt-6">
+                <h2 className="text-lg font-bold text-gray-900 mb-4">Top 3 Candidatos</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   {analysis.summary.top3.map((top, i) => (
-                    <div
-                      key={i}
-                      className="p-4 bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-lg border-2 border-yellow-300"
-                    >
-                      <div className="flex items-center gap-2 mb-2">
-                        <div className="w-8 h-8 bg-yellow-500 text-white rounded-full flex items-center justify-center font-bold">
-                          {i + 1}
-                        </div>
-                        <h3 className="font-semibold text-gray-900">{top.nombre}</h3>
+                    <div key={i} className="flex items-start gap-3 p-4 bg-gray-50 rounded-xl">
+                      <div className="flex-shrink-0 w-9 h-9 bg-amber-400 text-white rounded-full flex items-center justify-center font-bold text-sm">
+                        {i + 1}
                       </div>
-                      <div className="text-2xl font-bold text-yellow-600 mb-1">{top.score}</div>
-                      <p className="text-sm text-gray-700">{top.fortalezaPrincipal}</p>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-gray-900 truncate">{top.nombre}</h3>
+                        <div className="text-sm font-semibold text-blue-600 mb-1">{top.score}/100</div>
+                        <p className="text-xs text-gray-500 line-clamp-2">{top.fortalezaPrincipal}</p>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -211,8 +211,8 @@ export const AnalysisDetailPage = () => {
           </div>
 
           {/* Filters */}
-          <div className="bg-white rounded-lg shadow p-4 mb-6">
-            <h2 className="text-lg font-semibold mb-3">Filtros</h2>
+          <div className="bg-white rounded-xl border border-gray-200 p-5 mb-6">
+            <h2 className="text-sm font-semibold text-gray-700 mb-4">Filtros</h2>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Buscar</label>
@@ -261,10 +261,10 @@ export const AnalysisDetailPage = () => {
           </div>
 
           {/* Candidates List */}
-          <div className="bg-white rounded-lg shadow">
-            <div className="p-4 border-b">
-              <h2 className="text-xl font-bold">
-                Candidatos ({filteredCandidates.length} de {analysis.candidates.length})
+          <div className="bg-white rounded-xl border border-gray-200">
+            <div className="p-5 border-b border-gray-100">
+              <h2 className="text-lg font-bold text-gray-900">
+                Candidatos <span className="text-sm font-normal text-gray-400">({filteredCandidates.length} de {analysis.candidates.length})</span>
               </h2>
             </div>
 
@@ -347,8 +347,8 @@ export const AnalysisDetailPage = () => {
           </div>
 
           {/* Metadata Footer */}
-          <div className="mt-6 bg-white rounded-lg shadow p-4 text-sm text-gray-600">
-            <h3 className="font-semibold mb-2">📊 Metadata del Análisis</h3>
+          <div className="mt-6 bg-white rounded-xl border border-gray-200 p-5 text-sm text-gray-500">
+            <h3 className="font-semibold text-gray-700 mb-3">Metadata del Analisis</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
               <p>
                 CVs Procesados: <span className="font-semibold">{analysis.metadata.cvsProcessed}</span>

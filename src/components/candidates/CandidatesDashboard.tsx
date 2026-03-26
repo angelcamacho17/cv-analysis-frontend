@@ -168,15 +168,18 @@ export const CandidatesDashboard = () => {
   // Candidate Detail View
   if (selectedCandidate) {
     return (
-      <div className="p-4 sm:p-6 bg-gray-50 min-h-screen">
+      <div>
         <button
           onClick={backToList}
-          className="mb-4 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors flex items-center gap-2"
+          className="mb-6 inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
         >
-          <span>←</span> Volver
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          Volver
         </button>
 
-        <div className="bg-white rounded-lg shadow-lg p-6">
+        <div className="bg-white rounded-xl border border-gray-200 p-6 sm:p-8">
           <div className="flex items-start justify-between mb-6">
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-2">
@@ -278,69 +281,52 @@ export const CandidatesDashboard = () => {
 
   // Dashboard View
   return (
-    <div className="p-4 sm:p-6 bg-gray-50 min-h-screen">
-      <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6">Gestión de Candidatos</h1>
+    <div>
+      <div className="mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">Gestion de Candidatos</h1>
+        <p className="text-sm text-gray-500">Busca, filtra y revisa el historial de candidatos analizados</p>
+      </div>
 
-      {/* Estadísticas Generales */}
+      {/* Estadisticas Generales */}
       {statistics && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Total Análisis</p>
-                <p className="text-3xl font-bold text-gray-900">{statistics.totalAnalyses}</p>
-              </div>
-              <div className="text-4xl">📊</div>
-            </div>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <div className="bg-white rounded-xl border border-gray-200 p-5">
+            <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-2">Total Analisis</p>
+            <p className="text-3xl font-bold text-gray-900">{statistics.totalAnalyses}</p>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Candidatos Totales</p>
-                <p className="text-3xl font-bold text-gray-900">{statistics.totalCandidates}</p>
-              </div>
-              <div className="text-4xl">👥</div>
-            </div>
+          <div className="bg-white rounded-xl border border-gray-200 p-5">
+            <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-2">Candidatos</p>
+            <p className="text-3xl font-bold text-gray-900">{statistics.totalCandidates}</p>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Para Entrevistar</p>
-                <p className="text-3xl font-bold text-green-600">{statistics.candidatesToInterview}</p>
-              </div>
-              <div className="text-4xl">✅</div>
-            </div>
+          <div className="bg-white rounded-xl border border-gray-200 p-5">
+            <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-2">Para Entrevistar</p>
+            <p className="text-3xl font-bold text-green-600">{statistics.candidatesToInterview}</p>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Score Promedio</p>
-                <p className="text-3xl font-bold text-blue-600">{getAverageScore()}</p>
-              </div>
-              <div className="text-4xl">⭐</div>
-            </div>
+          <div className="bg-white rounded-xl border border-gray-200 p-5">
+            <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-2">Score Promedio</p>
+            <p className="text-3xl font-bold text-blue-600">{getAverageScore()}</p>
           </div>
         </div>
       )}
 
       {/* Tabs */}
-      <div className="bg-white rounded-lg shadow mb-6">
-        <div className="border-b border-gray-200">
-          <nav className="flex -mb-px">
+      <div className="bg-white rounded-xl border border-gray-200">
+        <div className="border-b border-gray-200 px-2">
+          <nav className="flex gap-1 -mb-px">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
+                className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
                   activeTab === tab.id
                     ? 'border-blue-600 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    : 'border-transparent text-gray-400 hover:text-gray-700 hover:border-gray-300'
                 }`}
               >
-                <span className="mr-2">{tab.icon}</span>
+                <span className="mr-1.5">{tab.icon}</span>
                 {tab.label}
               </button>
             ))}
@@ -550,39 +536,37 @@ export const CandidatesDashboard = () => {
               )}
 
               {!loadingAnalyses && analyses && analyses.length > 0 && (
-                <div className="space-y-4">
+                <div className="space-y-3">
                   {analyses.map((analysis) => (
                     <Link
                       key={analysis.id}
                       to={`/candidates/analysis/${analysis.id}`}
-                      className="block p-6 bg-white border border-gray-200 rounded-lg hover:shadow-lg hover:border-blue-300 transition-all"
+                      className="block p-5 bg-gray-50 rounded-xl hover:bg-blue-50/50 hover:ring-1 hover:ring-blue-200 transition-all"
                     >
                       <div className="flex items-start justify-between mb-4">
                         <div>
-                          <h3 className="font-semibold text-lg text-gray-900">{analysis.excelFilename}</h3>
-                          <p className="text-sm text-gray-500">
+                          <h3 className="font-semibold text-gray-900">{analysis.excelFilename}</h3>
+                          <p className="text-sm text-gray-400 mt-0.5">
                             {new Date(analysis.analysisDate).toLocaleString()}
                           </p>
                         </div>
-                        <div className="text-right">
-                          <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
-                            {analysis.totalCandidates} candidatos
-                          </span>
-                        </div>
+                        <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-xs font-semibold">
+                          {analysis.totalCandidates} candidatos
+                        </span>
                       </div>
 
-                      <div className="grid grid-cols-3 gap-4">
-                        <div className="text-center p-3 bg-green-50 rounded">
-                          <div className="text-2xl font-bold text-green-600">{analysis.paraEntrevistar}</div>
-                          <div className="text-xs text-gray-600">Para entrevistar</div>
+                      <div className="grid grid-cols-3 gap-3">
+                        <div className="text-center p-3 bg-white rounded-lg">
+                          <div className="text-xl font-bold text-green-600">{analysis.paraEntrevistar}</div>
+                          <div className="text-xs text-gray-400">Entrevistar</div>
                         </div>
-                        <div className="text-center p-3 bg-yellow-50 rounded">
-                          <div className="text-2xl font-bold text-yellow-600">{analysis.quizas}</div>
-                          <div className="text-xs text-gray-600">Quizás</div>
+                        <div className="text-center p-3 bg-white rounded-lg">
+                          <div className="text-xl font-bold text-amber-500">{analysis.quizas}</div>
+                          <div className="text-xs text-gray-400">Quizas</div>
                         </div>
-                        <div className="text-center p-3 bg-red-50 rounded">
-                          <div className="text-2xl font-bold text-red-600">{analysis.descartados}</div>
-                          <div className="text-xs text-gray-600">Descartados</div>
+                        <div className="text-center p-3 bg-white rounded-lg">
+                          <div className="text-xl font-bold text-red-500">{analysis.descartados}</div>
+                          <div className="text-xs text-gray-400">Descartados</div>
                         </div>
                       </div>
                     </Link>

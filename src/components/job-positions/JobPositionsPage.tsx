@@ -41,14 +41,13 @@ export const JobPositionsPage = () => {
   };
 
   return (
-    <div className="p-4 sm:p-6 bg-gray-50 min-h-screen">
-      <div className="max-w-7xl mx-auto">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Posiciones de Trabajo</h1>
-          <p className="text-gray-600">
-            Gestiona las posiciones de trabajo para analizar candidatos específicos para cada rol
-          </p>
-        </div>
+    <div>
+      <div className="mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">Posiciones de Trabajo</h1>
+        <p className="text-sm text-gray-500">
+          Gestiona las posiciones de trabajo para analizar candidatos especificos para cada rol
+        </p>
+      </div>
 
         <JobPositionsList
           onCreateNew={handleCreateNew}
@@ -64,7 +63,6 @@ export const JobPositionsPage = () => {
             onSave={handleSave}
           />
         )}
-      </div>
     </div>
   );
 };

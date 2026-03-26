@@ -80,15 +80,18 @@ export const PositionAnalytics = () => {
       <div>
         <button
           onClick={() => navigate('/positions')}
-          className="mb-4 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+          className="mb-6 inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
         >
-          ← Volver a Posiciones
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          Posiciones
         </button>
 
-        <div className="bg-white rounded-lg shadow-lg p-6">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">{position.title}</h1>
-          {position.department && <p className="text-gray-600 mb-1">📍 {position.department}</p>}
-          {position.location && <p className="text-gray-500 mb-4">🌍 {position.location}</p>}
+        <div className="bg-white rounded-xl border border-gray-200 p-6 sm:p-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">{position.title}</h1>
+          {position.department && <p className="text-sm text-gray-500 mb-1">{position.department}</p>}
+          {position.location && <p className="text-sm text-gray-400 mb-4">{position.location}</p>}
 
           <div className="border-t border-gray-200 pt-4 mt-4">
             <p className="text-sm font-semibold text-gray-700 mb-2">Habilidades Requeridas:</p>
@@ -105,101 +108,74 @@ export const PositionAnalytics = () => {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white rounded-lg shadow p-6 text-center">
-          <div className="text-4xl font-bold text-blue-600">{stats.totalAnalyses}</div>
-          <div className="text-sm text-gray-600 mt-1">Análisis Totales</div>
+        <div className="bg-white rounded-xl border border-gray-200 p-5 text-center">
+          <div className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-2">Analisis</div>
+          <div className="text-3xl font-bold text-gray-900">{stats.totalAnalyses}</div>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-6 text-center">
-          <div className="text-4xl font-bold text-purple-600">{stats.totalCandidatesAnalyzed}</div>
-          <div className="text-sm text-gray-600 mt-1">Candidatos Analizados</div>
+        <div className="bg-white rounded-xl border border-gray-200 p-5 text-center">
+          <div className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-2">Candidatos</div>
+          <div className="text-3xl font-bold text-gray-900">{stats.totalCandidatesAnalyzed}</div>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-6 text-center">
-          <div className="text-4xl font-bold text-green-600">{stats.candidatesToInterview}</div>
-          <div className="text-sm text-gray-600 mt-1">Para Entrevistar</div>
+        <div className="bg-white rounded-xl border border-gray-200 p-5 text-center">
+          <div className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-2">Entrevistar</div>
+          <div className="text-3xl font-bold text-green-600">{stats.candidatesToInterview}</div>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-6 text-center">
-          <div className="text-4xl font-bold text-yellow-600">{stats.averageScore.toFixed(1)}</div>
-          <div className="text-sm text-gray-600 mt-1">Score Promedio</div>
+        <div className="bg-white rounded-xl border border-gray-200 p-5 text-center">
+          <div className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-2">Score Promedio</div>
+          <div className="text-3xl font-bold text-blue-600">{stats.averageScore.toFixed(1)}</div>
         </div>
       </div>
 
       {/* Category Breakdown */}
-      <div className="bg-white rounded-lg shadow p-6">
-        <h3 className="text-xl font-bold text-gray-900 mb-4">Distribución de Categorías</h3>
+      <div className="bg-white rounded-xl border border-gray-200 p-6">
+        <h3 className="text-lg font-bold text-gray-900 mb-5">Distribucion de Categorias</h3>
 
-        <div className="space-y-4">
-          {/* Interview */}
+        <div className="space-y-5">
           <div>
             <div className="flex justify-between mb-2">
-              <span className="text-sm font-medium text-gray-700">✅ Para Entrevistar</span>
+              <span className="text-sm font-medium text-gray-700">Para Entrevistar</span>
               <span className="text-sm font-semibold text-green-600">
                 {stats.candidatesToInterview} ({getPercentage(stats.candidatesToInterview, stats.totalCandidatesAnalyzed)}%)
               </span>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-8 overflow-hidden">
+            <div className="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden">
               <div
-                className="h-full bg-green-500 flex items-center justify-end pr-2 transition-all duration-300"
-                style={{
-                  width: `${getPercentage(stats.candidatesToInterview, stats.totalCandidatesAnalyzed)}%`,
-                }}
-              >
-                <span className="text-white text-xs font-bold">
-                  {stats.candidatesToInterview > 0 && stats.totalCandidatesAnalyzed > 0
-                    ? `${getPercentage(stats.candidatesToInterview, stats.totalCandidatesAnalyzed)}%`
-                    : ''}
-                </span>
-              </div>
+                className="h-full bg-green-500 rounded-full transition-all duration-300"
+                style={{ width: `${getPercentage(stats.candidatesToInterview, stats.totalCandidatesAnalyzed)}%` }}
+              />
             </div>
           </div>
 
-          {/* Maybe */}
           <div>
             <div className="flex justify-between mb-2">
-              <span className="text-sm font-medium text-gray-700">🤔 Quizás</span>
-              <span className="text-sm font-semibold text-yellow-600">
+              <span className="text-sm font-medium text-gray-700">Quizas</span>
+              <span className="text-sm font-semibold text-amber-500">
                 {stats.candidatesMaybe} ({getPercentage(stats.candidatesMaybe, stats.totalCandidatesAnalyzed)}%)
               </span>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-8 overflow-hidden">
+            <div className="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden">
               <div
-                className="h-full bg-yellow-500 flex items-center justify-end pr-2 transition-all duration-300"
-                style={{
-                  width: `${getPercentage(stats.candidatesMaybe, stats.totalCandidatesAnalyzed)}%`,
-                }}
-              >
-                <span className="text-white text-xs font-bold">
-                  {stats.candidatesMaybe > 0 && stats.totalCandidatesAnalyzed > 0
-                    ? `${getPercentage(stats.candidatesMaybe, stats.totalCandidatesAnalyzed)}%`
-                    : ''}
-                </span>
-              </div>
+                className="h-full bg-amber-400 rounded-full transition-all duration-300"
+                style={{ width: `${getPercentage(stats.candidatesMaybe, stats.totalCandidatesAnalyzed)}%` }}
+              />
             </div>
           </div>
 
-          {/* Rejected */}
           <div>
             <div className="flex justify-between mb-2">
-              <span className="text-sm font-medium text-gray-700">❌ Descartados</span>
-              <span className="text-sm font-semibold text-red-600">
+              <span className="text-sm font-medium text-gray-700">Descartados</span>
+              <span className="text-sm font-semibold text-red-500">
                 {stats.candidatesRejected} ({getPercentage(stats.candidatesRejected, stats.totalCandidatesAnalyzed)}%)
               </span>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-8 overflow-hidden">
+            <div className="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden">
               <div
-                className="h-full bg-red-500 flex items-center justify-end pr-2 transition-all duration-300"
-                style={{
-                  width: `${getPercentage(stats.candidatesRejected, stats.totalCandidatesAnalyzed)}%`,
-                }}
-              >
-                <span className="text-white text-xs font-bold">
-                  {stats.candidatesRejected > 0 && stats.totalCandidatesAnalyzed > 0
-                    ? `${getPercentage(stats.candidatesRejected, stats.totalCandidatesAnalyzed)}%`
-                    : ''}
-                </span>
-              </div>
+                className="h-full bg-red-400 rounded-full transition-all duration-300"
+                style={{ width: `${getPercentage(stats.candidatesRejected, stats.totalCandidatesAnalyzed)}%` }}
+              />
             </div>
           </div>
         </div>
@@ -207,8 +183,8 @@ export const PositionAnalytics = () => {
 
       {/* Top Candidates */}
       {stats.topCandidates && stats.topCandidates.length > 0 && (
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-xl font-bold text-gray-900 mb-4">🏆 Top Candidatos</h3>
+        <div className="bg-white rounded-xl border border-gray-200 p-6">
+          <h3 className="text-lg font-bold text-gray-900 mb-4">Top Candidatos</h3>
 
           <div className="overflow-x-auto">
             <table className="w-full">
@@ -249,8 +225,8 @@ export const PositionAnalytics = () => {
 
       {/* Recent Analyses */}
       {analyses && analyses.analyses.length > 0 && (
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-xl font-bold text-gray-900 mb-4">📋 Análisis Recientes</h3>
+        <div className="bg-white rounded-xl border border-gray-200 p-6">
+          <h3 className="text-lg font-bold text-gray-900 mb-4">Analisis Recientes</h3>
 
           <div className="space-y-3">
             {analyses.analyses.map((analysis) => (

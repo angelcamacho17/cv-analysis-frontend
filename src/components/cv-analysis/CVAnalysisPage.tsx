@@ -273,18 +273,20 @@ export const CVAnalysisPage = () => {
   };
 
   return (
-    <div className="p-4 sm:p-6 bg-gray-50 min-h-screen">
-      <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-2">
-        Análisis de CVs con Claude
-      </h1>
-      <p className="text-gray-600 mb-6 text-sm sm:text-base">
-        Analiza candidatos para Victoria Poggioli usando Inteligencia Artificial
-      </p>
+    <div>
+      <div className="mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">
+          Analisis de CVs con Claude
+        </h1>
+        <p className="text-gray-500 text-sm sm:text-base">
+          Analiza candidatos para Victoria Poggioli usando Inteligencia Artificial
+        </p>
+      </div>
 
       {/* Formulario de carga */}
       {!analysisResult && (
-        <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 max-w-4xl">
-          <div className="space-y-6">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sm:p-8 max-w-4xl">
+          <div className="space-y-8">
             {/* JOB POSITION SELECTOR - NEW! REQUIRED! */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -399,37 +401,48 @@ export const CVAnalysisPage = () => {
               )}
             </div>
 
-            {/* Información (v4.0.0 - PDF-only) */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <p className="text-sm text-blue-900 mb-2">
-                <strong>ℹ️ Información (v4.0.0):</strong>
+            {/* Información */}
+            <div className="bg-blue-50/60 border border-blue-100 rounded-xl p-5">
+              <p className="text-sm font-semibold text-blue-900 mb-3">
+                Informacion
               </p>
-              <ul className="text-xs text-blue-800 space-y-1 ml-4">
-                <li>• Los CVs en PDF son obligatorios (mínimo 1, máximo 50)</li>
-                <li>• Ya NO se requiere archivo Excel</li>
-                <li>• Claude extrae automáticamente nombre, email y teléfono de cada PDF</li>
-                <li>• El análisis puede tomar 1-3 minutos dependiendo del número de CVs</li>
-                <li>• El sistema detecta automáticamente CVs duplicados (caché)</li>
+              <ul className="text-sm text-blue-800 space-y-2">
+                <li className="flex items-start gap-2">
+                  <span className="text-blue-400 mt-0.5">-</span>
+                  Los CVs en PDF son obligatorios (minimo 1, maximo 50)
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-blue-400 mt-0.5">-</span>
+                  Claude extrae automaticamente nombre, email y telefono de cada PDF
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-blue-400 mt-0.5">-</span>
+                  El analisis puede tomar 1-3 minutos dependiendo del numero de CVs
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-blue-400 mt-0.5">-</span>
+                  El sistema detecta automaticamente CVs duplicados (cache)
+                </li>
               </ul>
             </div>
 
-            {/* Botón de análisis */}
-            <div className="flex items-center justify-between pt-4 border-t">
-              <div className="text-xs text-gray-500">* Campos obligatorios</div>
+            {/* Boton de analisis */}
+            <div className="flex items-center justify-between pt-6 border-t border-gray-100">
+              <div className="text-xs text-gray-400">* Campos obligatorios</div>
               <button
                 onClick={analyzeResumes}
                 disabled={loading || !canAnalyze}
-                className={`px-6 py-2 rounded-lg font-medium transition-colors ${
+                className={`px-8 py-3 rounded-xl font-semibold text-sm transition-all ${
                   loading || !canAnalyze
-                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                    : 'bg-black text-white hover:bg-gray-800'
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                    : 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm hover:shadow-md'
                 }`}
               >
                 {!loading ? (
-                  <span>🚀 Analizar Candidatos</span>
+                  <span>Analizar Candidatos</span>
                 ) : (
-                  <span>
-                    <span className="inline-block animate-spin mr-2">⏳</span>
+                  <span className="flex items-center gap-2">
+                    <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
                     Analizando...
                   </span>
                 )}
@@ -439,49 +452,48 @@ export const CVAnalysisPage = () => {
 
           {/* Error */}
           {error && (
-            <div className="mt-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded text-sm">
-              <strong>❌ Error:</strong> {error}
+            <div className="mt-6 bg-red-50 border border-red-200 text-red-700 px-5 py-4 rounded-xl text-sm flex items-start gap-3">
+              <svg className="w-5 h-5 text-red-400 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              </svg>
+              <span>{error}</span>
             </div>
           )}
 
           {/* Progress Section */}
           {loading && (
-            <div className="mt-6 bg-white rounded-lg shadow-md p-6">
+            <div className="mt-8 bg-white rounded-xl border border-gray-200 p-6 sm:p-8">
               {/* Current Step */}
-              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                <span>{getStepIcon(currentStep)}</span>
-                <span>{currentMessage}</span>
-              </h3>
+              <div className="flex items-center gap-3 mb-6">
+                <span className="text-2xl">{getStepIcon(currentStep)}</span>
+                <h3 className="text-lg font-semibold text-gray-900">{currentMessage}</h3>
+              </div>
 
               {/* Progress Bar */}
-              <div className="w-full h-8 bg-gray-200 rounded-full overflow-hidden mb-2">
+              <div className="w-full h-3 bg-gray-100 rounded-full overflow-hidden mb-2">
                 <div
-                  className="h-full bg-gradient-to-r from-blue-500 to-cyan-500 transition-all duration-300 flex items-center justify-end pr-2"
+                  className="h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-full transition-all duration-500"
                   style={{ width: `${progressPercentage}%` }}
-                >
-                  {progressPercentage > 10 && (
-                    <span className="text-white text-xs font-bold">{progressPercentage}%</span>
-                  )}
-                </div>
+                />
               </div>
-              <p className="text-center text-sm font-medium text-blue-600 mb-4">{progressPercentage}%</p>
+              <p className="text-right text-sm font-semibold text-blue-600 mb-6">{progressPercentage}%</p>
 
               {/* Progress Log */}
               {progressLog.length > 0 && (
-                <div className="mt-6">
-                  <h4 className="text-sm font-semibold text-gray-700 mb-3">📋 Detalle del progreso:</h4>
-                  <div className="max-h-64 overflow-y-auto bg-gray-50 rounded-lg p-4 space-y-2">
+                <div className="mt-4">
+                  <h4 className="text-sm font-semibold text-gray-700 mb-3">Detalle del progreso</h4>
+                  <div className="max-h-64 overflow-y-auto bg-gray-50 rounded-xl p-4 space-y-3">
                     {progressLog.map((log, idx) => (
                       <div
                         key={idx}
-                        className={`flex items-start gap-3 text-sm border-b border-gray-200 pb-2 last:border-0 ${
+                        className={`flex items-start gap-3 text-sm ${
                           log.error ? 'text-red-600' : log.warning ? 'text-yellow-600' : ''
                         }`}
                       >
-                        <span className="text-lg">{getStepIcon(log.step)}</span>
-                        <div className="flex-1">
-                          <p className="text-gray-900">{log.message}</p>
-                          {log.info && <p className="text-xs text-gray-500 mt-1">{log.info}</p>}
+                        <span className="text-base mt-0.5">{getStepIcon(log.step)}</span>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-gray-800">{log.message}</p>
+                          {log.info && <p className="text-xs text-gray-400 mt-0.5">{log.info}</p>}
                         </div>
                         <span className="text-xs text-gray-400 whitespace-nowrap">
                           {new Date().toLocaleTimeString()}
@@ -492,8 +504,8 @@ export const CVAnalysisPage = () => {
                 </div>
               )}
 
-              <p className="text-center text-xs text-gray-500 mt-4">
-                Este proceso puede tomar 1-2 minutos dependiendo del número de candidatos...
+              <p className="text-center text-xs text-gray-400 mt-6">
+                Este proceso puede tomar 1-2 minutos dependiendo del numero de candidatos...
               </p>
             </div>
           )}
@@ -503,54 +515,57 @@ export const CVAnalysisPage = () => {
       {/* Resultados */}
       {analysisResult && !loading && (
         <div className="space-y-6">
-          {/* Botón volver */}
+          {/* Boton volver */}
           <button
             onClick={reset}
-            className="mb-4 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-sm font-medium"
+            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
           >
-            ← Analizar nuevos candidatos
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Analizar nuevos candidatos
           </button>
 
           {/* Resumen ejecutivo */}
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-2xl font-bold mb-4">📊 Resumen Ejecutivo</h2>
+          <div className="bg-white rounded-xl border border-gray-200 p-6 sm:p-8">
+            <h2 className="text-xl font-bold text-gray-900 mb-6">Resumen Ejecutivo</h2>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-              <div className="bg-blue-50 p-4 rounded-lg">
-                <div className="text-3xl font-bold text-blue-600">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+              <div className="bg-blue-50 p-5 rounded-xl text-center">
+                <div className="text-3xl font-bold text-blue-600 mb-1">
                   {analysisResult.resumen.totalAnalizados}
                 </div>
-                <div className="text-sm text-gray-600">Total analizados</div>
+                <div className="text-sm text-gray-500 font-medium">Total analizados</div>
               </div>
-              <div className="bg-green-50 p-4 rounded-lg">
-                <div className="text-3xl font-bold text-green-600">
+              <div className="bg-green-50 p-5 rounded-xl text-center">
+                <div className="text-3xl font-bold text-green-600 mb-1">
                   {analysisResult.resumen.paraEntrevistar}
                 </div>
-                <div className="text-sm text-gray-600">Para entrevistar</div>
+                <div className="text-sm text-gray-500 font-medium">Para entrevistar</div>
               </div>
-              <div className="bg-yellow-50 p-4 rounded-lg">
-                <div className="text-3xl font-bold text-yellow-600">{analysisResult.resumen.quizas}</div>
-                <div className="text-sm text-gray-600">Quizás</div>
+              <div className="bg-amber-50 p-5 rounded-xl text-center">
+                <div className="text-3xl font-bold text-amber-600 mb-1">{analysisResult.resumen.quizas}</div>
+                <div className="text-sm text-gray-500 font-medium">Quizas</div>
               </div>
-              <div className="bg-red-50 p-4 rounded-lg">
-                <div className="text-3xl font-bold text-red-600">{analysisResult.resumen.descartados}</div>
-                <div className="text-sm text-gray-600">Descartados</div>
+              <div className="bg-red-50 p-5 rounded-xl text-center">
+                <div className="text-3xl font-bold text-red-500 mb-1">{analysisResult.resumen.descartados}</div>
+                <div className="text-sm text-gray-500 font-medium">Descartados</div>
               </div>
             </div>
 
             {/* TOP 3 */}
-            <div className="border-t pt-4">
-              <h3 className="font-bold text-lg mb-3">🏆 Top 3 Recomendados</h3>
-              <div className="space-y-2">
+            <div className="border-t border-gray-100 pt-6">
+              <h3 className="font-bold text-lg text-gray-900 mb-4">Top 3 Recomendados</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 {analysisResult.resumen.top3.map((top, i) => (
-                  <div key={i} className="flex items-start p-3 bg-gray-50 rounded-lg">
-                    <div className="flex-shrink-0 w-8 h-8 bg-yellow-400 text-white rounded-full flex items-center justify-center font-bold mr-3">
+                  <div key={i} className="flex items-start gap-3 p-4 bg-gray-50 rounded-xl">
+                    <div className="flex-shrink-0 w-9 h-9 bg-amber-400 text-white rounded-full flex items-center justify-center font-bold text-sm">
                       {i + 1}
                     </div>
-                    <div className="flex-1">
-                      <div className="font-semibold">{top.nombre}</div>
-                      <div className="text-sm text-gray-600">Score: {top.score}/100</div>
-                      <div className="text-sm text-gray-700 mt-1">{top.fortalezaPrincipal}</div>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-semibold text-gray-900 truncate">{top.nombre}</div>
+                      <div className="text-sm font-semibold text-blue-600 mb-1">{top.score}/100</div>
+                      <div className="text-xs text-gray-500 line-clamp-2">{top.fortalezaPrincipal}</div>
                     </div>
                   </div>
                 ))}
@@ -559,14 +574,14 @@ export const CVAnalysisPage = () => {
           </div>
 
           {/* Filtros */}
-          <div className="bg-white rounded-lg shadow-md p-4">
+          <div className="bg-white rounded-xl border border-gray-200 p-4">
             <div className="flex flex-wrap gap-2">
               <button
                 onClick={() => setFilterCategory('todos')}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                   filterCategory === 'todos'
-                    ? 'bg-black text-white'
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                    ? 'bg-gray-900 text-white'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
                 Todos ({analysisResult.candidatos.length})
@@ -576,30 +591,30 @@ export const CVAnalysisPage = () => {
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                   filterCategory === 'entrevistar'
                     ? 'bg-green-600 text-white'
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
-                ✅ Entrevistar ({getCandidatesByCategory('entrevistar').length})
+                Entrevistar ({getCandidatesByCategory('entrevistar').length})
               </button>
               <button
                 onClick={() => setFilterCategory('quizas')}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                   filterCategory === 'quizas'
-                    ? 'bg-yellow-600 text-white'
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                    ? 'bg-amber-500 text-white'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
-                🤔 Quizás ({getCandidatesByCategory('quizas').length})
+                Quizas ({getCandidatesByCategory('quizas').length})
               </button>
               <button
                 onClick={() => setFilterCategory('descartar')}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                   filterCategory === 'descartar'
-                    ? 'bg-red-600 text-white'
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                    ? 'bg-red-500 text-white'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
-                ❌ Descartar ({getCandidatesByCategory('descartar').length})
+                Descartar ({getCandidatesByCategory('descartar').length})
               </button>
             </div>
           </div>
@@ -607,45 +622,48 @@ export const CVAnalysisPage = () => {
           {/* Lista de candidatos */}
           <div className="space-y-4">
             {getFilteredCandidates().map((candidato, idx) => (
-              <div key={idx} className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+              <div key={idx} className="bg-white rounded-xl border border-gray-200 p-6 hover:border-gray-300 transition-colors">
                 {/* Header */}
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 pb-4 border-b">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-5 pb-5 border-b border-gray-100">
                   <div>
-                    <h3 className="text-xl font-bold text-gray-900">{candidato.nombre}</h3>
-                    <div className="text-sm text-gray-600 mt-1">
-                      <div>📧 {candidato.email}</div>
-                      <div>📱 {candidato.telefono}</div>
+                    <h3 className="text-lg font-bold text-gray-900 mb-1">{candidato.nombre}</h3>
+                    <div className="text-sm text-gray-500 space-y-0.5">
+                      <div>{candidato.email}</div>
+                      <div>{candidato.telefono}</div>
                     </div>
                   </div>
                   <div className="mt-3 sm:mt-0 flex items-center gap-3">
-                    <div className={`px-4 py-2 rounded-lg font-bold text-center ${getCategoryClass(candidato.categoria)}`}>
+                    <span className={`px-3 py-1.5 rounded-lg text-xs font-semibold ${getCategoryClass(candidato.categoria)}`}>
                       {getCategoryLabel(candidato.categoria)}
-                    </div>
-                    <div className="text-3xl font-bold text-gray-900">
-                      {candidato.score}
-                      <span className="text-lg text-gray-500">/100</span>
+                    </span>
+                    <div className="text-right">
+                      <span className="text-3xl font-bold text-gray-900">{candidato.score}</span>
+                      <span className="text-sm text-gray-400 ml-0.5">/100</span>
                     </div>
                   </div>
                 </div>
 
                 {/* Detalles */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <h4 className="font-semibold text-sm text-gray-700 mb-2">💪 Fortaleza Principal</h4>
-                    <p className="text-sm text-gray-900">{candidato.fortalezaPrincipal}</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <div className="bg-green-50/50 rounded-lg p-4">
+                    <h4 className="font-semibold text-sm text-gray-700 mb-2">Fortaleza Principal</h4>
+                    <p className="text-sm text-gray-800 leading-relaxed">{candidato.fortalezaPrincipal}</p>
                   </div>
 
-                  <div>
-                    <h4 className="font-semibold text-sm text-gray-700 mb-2">🚩 Bandera Roja</h4>
-                    <p className="text-sm text-gray-900">{candidato.banderaRoja}</p>
+                  <div className="bg-red-50/50 rounded-lg p-4">
+                    <h4 className="font-semibold text-sm text-gray-700 mb-2">Bandera Roja</h4>
+                    <p className="text-sm text-gray-800 leading-relaxed">{candidato.banderaRoja}</p>
                   </div>
 
                   {candidato.fortalezas && candidato.fortalezas.length > 0 && (
                     <div className="md:col-span-2">
-                      <h4 className="font-semibold text-sm text-gray-700 mb-2">✨ Fortalezas</h4>
-                      <ul className="list-disc list-inside text-sm text-gray-900 space-y-1">
+                      <h4 className="font-semibold text-sm text-gray-700 mb-2">Fortalezas</h4>
+                      <ul className="space-y-1.5">
                         {candidato.fortalezas.map((f, i) => (
-                          <li key={i}>{f}</li>
+                          <li key={i} className="flex items-start gap-2 text-sm text-gray-700">
+                            <span className="text-green-400 mt-1">-</span>
+                            {f}
+                          </li>
                         ))}
                       </ul>
                     </div>
@@ -653,10 +671,13 @@ export const CVAnalysisPage = () => {
 
                   {candidato.areasAtencion && candidato.areasAtencion.length > 0 && (
                     <div className="md:col-span-2">
-                      <h4 className="font-semibold text-sm text-gray-700 mb-2">⚠️ Áreas de Atención</h4>
-                      <ul className="list-disc list-inside text-sm text-gray-900 space-y-1">
+                      <h4 className="font-semibold text-sm text-gray-700 mb-2">Areas de Atencion</h4>
+                      <ul className="space-y-1.5">
                         {candidato.areasAtencion.map((a, i) => (
-                          <li key={i}>{a}</li>
+                          <li key={i} className="flex items-start gap-2 text-sm text-gray-700">
+                            <span className="text-amber-400 mt-1">-</span>
+                            {a}
+                          </li>
                         ))}
                       </ul>
                     </div>
@@ -664,17 +685,17 @@ export const CVAnalysisPage = () => {
 
                   {candidato.consistencia && (
                     <div className="md:col-span-2">
-                      <h4 className="font-semibold text-sm text-gray-700 mb-2">📋 Consistencia CV vs Formulario</h4>
-                      <p className="text-sm text-gray-900">{candidato.consistencia}</p>
+                      <h4 className="font-semibold text-sm text-gray-700 mb-2">Consistencia CV vs Formulario</h4>
+                      <p className="text-sm text-gray-700 leading-relaxed">{candidato.consistencia}</p>
                     </div>
                   )}
 
                   {candidato.preguntaSugerida && (
-                    <div className="md:col-span-2 bg-blue-50 p-4 rounded-lg">
-                      <h4 className="font-semibold text-sm text-blue-900 mb-2">
-                        💬 Pregunta Sugerida para Entrevista
+                    <div className="md:col-span-2 bg-blue-50/60 border border-blue-100 p-4 rounded-xl">
+                      <h4 className="font-semibold text-sm text-blue-800 mb-2">
+                        Pregunta Sugerida para Entrevista
                       </h4>
-                      <p className="text-sm text-blue-900 italic">&quot;{candidato.preguntaSugerida}&quot;</p>
+                      <p className="text-sm text-blue-700 italic leading-relaxed">&quot;{candidato.preguntaSugerida}&quot;</p>
                     </div>
                   )}
                 </div>
@@ -682,10 +703,10 @@ export const CVAnalysisPage = () => {
             ))}
           </div>
 
-          {/* No hay candidatos en la categoría seleccionada */}
+          {/* No hay candidatos en la categoria seleccionada */}
           {getFilteredCandidates().length === 0 && (
-            <div className="bg-white rounded-lg shadow-md p-12 text-center">
-              <p className="text-gray-500">No hay candidatos en esta categoría</p>
+            <div className="bg-white rounded-xl border border-gray-200 p-16 text-center">
+              <p className="text-gray-400 text-sm">No hay candidatos en esta categoria</p>
             </div>
           )}
         </div>
