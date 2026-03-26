@@ -5,6 +5,7 @@
  */
 
 import { apiFetch } from './api-client';
+import { environment } from '../config/environment';
 import type { AnalysisResult, SSEEvent, FinalResult } from '../types/cv-analysis';
 
 // v4.0.0: Analysis endpoints are now at /api/analyze and /api/analyze-stream
@@ -30,22 +31,36 @@ export const analyzeCVWithProgress = async (
     formData.append('jobPositionId', String(jobPositionId));
     cvFiles.forEach((cv) => formData.append('cvs', cv));
 
-    const response = await apiFetch(`/analyze-stream`, {
+    const token = localStorage.getItem('authToken');
+    const headers: Record<string, string> = {
+      'Accept': 'text/event-stream',
+    };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    const url = `${environment.apiUrl}/analyze-stream`;
+
+    console.log(`🌐 SSE Request: POST ${url}`);
+
+    const response = await fetch(url, {
       method: 'POST',
+      headers,
       body: formData,
+      cache: 'no-cache',
     });
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      const errorText = await response.text().catch(() => '');
+      throw new Error(`HTTP error ${response.status}: ${errorText || response.statusText}`);
     }
 
-    const reader = response.body?.getReader();
+    if (!response.body) {
+      throw new Error('Response body is not readable - streaming not supported');
+    }
+
+    const reader = response.body.getReader();
     const decoder = new TextDecoder();
-
-    if (!reader) {
-      throw new Error('Response body is not readable');
-    }
-
     let buffer = '';
 
     while (true) {
@@ -64,7 +79,7 @@ export const analyzeCVWithProgress = async (
             const event: SSEEvent = JSON.parse(data);
 
             if ('done' in event && event.done) {
-              onComplete(event);
+              onComplete(event as FinalResult);
             } else {
               onProgress(event);
             }
