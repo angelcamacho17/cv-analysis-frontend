@@ -32,22 +32,16 @@ export const analyzeCVWithProgress = async (
     cvFiles.forEach((cv) => formData.append('cvs', cv));
 
     const token = localStorage.getItem('authToken');
-    const headers: Record<string, string> = {
-      'Accept': 'text/event-stream',
-    };
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-
     const url = `${environment.apiUrl}/analyze-stream`;
 
     console.log(`🌐 SSE Request: POST ${url}`);
+    console.log(`📄 Files: ${cvFiles.length}, JobPosition: ${jobPositionId}, Auth: ${token ? 'yes' : 'no'}`);
 
+    // Use same pattern as working mv-admin: minimal headers, let browser handle Content-Type
     const response = await fetch(url, {
       method: 'POST',
-      headers,
+      headers: token ? { 'Authorization': `Bearer ${token}` } : { 'Authorization': `Bearer f7014ba0103ac7d68f13d82e672ccadb43dc5b0c0048c85bce286710621ace39` },
       body: formData,
-      cache: 'no-cache',
     });
 
     if (!response.ok) {
