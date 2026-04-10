@@ -31,18 +31,24 @@ export const analyzeCVWithProgress = async (
     formData.append('jobPositionId', String(jobPositionId));
     cvFiles.forEach((cv) => formData.append('cvs', cv));
 
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('cv_analysis_token');
     const url = `${environment.apiUrl}/analyze-stream`;
 
-    console.log(`🌐 SSE Request: POST ${url}`);
-    console.log(`📄 Files: ${cvFiles.length}, JobPosition: ${jobPositionId}, Auth: ${token ? 'yes' : 'no'}`);
+    console.log(`SSE Request: POST ${url}`);
+    console.log(`Files: ${cvFiles.length}, JobPosition: ${jobPositionId}`);
 
-    // Use same pattern as working mv-admin: minimal headers, let browser handle Content-Type
     const response = await fetch(url, {
       method: 'POST',
-      headers: token ? { 'Authorization': `Bearer ${token}` } : { 'Authorization': `Bearer f7014ba0103ac7d68f13d82e672ccadb43dc5b0c0048c85bce286710621ace39` },
+      headers: token ? { 'Authorization': `Bearer ${token}` } : {},
       body: formData,
     });
+
+    if (response.status === 401) {
+      localStorage.removeItem('cv_analysis_token');
+      localStorage.removeItem('cv_analysis_user');
+      window.location.href = '/login';
+      return;
+    }
 
     if (!response.ok) {
       const errorText = await response.text().catch(() => '');

@@ -1,19 +1,22 @@
 /**
  * Centralized API Client
- * Handles authentication, headers, and error handling for all API calls
+ * Handles JWT authentication, headers, 401 auto-logout, and error handling
  */
 
 import { environment } from '../config/environment';
 
+const TOKEN_KEY = 'cv_analysis_token';
+const USER_KEY = 'cv_analysis_user';
+
 /**
- * Get authentication token from localStorage
+ * Get JWT token from localStorage
  */
 export const getAuthToken = (): string | null => {
-  return localStorage.getItem('authToken');
+  return localStorage.getItem(TOKEN_KEY);
 };
 
 /**
- * Get standard headers including authentication
+ * Get standard headers including JWT authentication
  */
 export const getAuthHeaders = (): Record<string, string> => {
   const token = getAuthToken();
@@ -37,7 +40,16 @@ export const getJsonHeaders = (): Record<string, string> => {
 };
 
 /**
- * Centralized fetch wrapper with automatic auth header injection
+ * Handle 401 responses — clear auth and redirect to login
+ */
+const handle401 = () => {
+  localStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem(USER_KEY);
+  window.location.href = '/login';
+};
+
+/**
+ * Centralized fetch wrapper with automatic JWT header injection and 401 handling
  */
 export const apiFetch = async (
   endpoint: string,
@@ -45,7 +57,6 @@ export const apiFetch = async (
 ): Promise<Response> => {
   const url = endpoint.startsWith('http') ? endpoint : `${environment.apiUrl}${endpoint}`;
 
-  // Merge auth headers with custom headers
   const headers = {
     ...getAuthHeaders(),
     ...(options.headers || {}),
@@ -56,27 +67,24 @@ export const apiFetch = async (
     headers,
   };
 
-  console.log(`🌐 API Request: ${options.method || 'GET'} ${url}`);
-  console.log(`🔑 Auth Header: ${(headers as Record<string, string>)['Authorization'] ? '✓ Bearer token present' : '✗ No token'}`);
+  console.log(`API Request: ${options.method || 'GET'} ${url}`);
 
   try {
     const response = await fetch(url, config);
 
-    // Log response for debugging
+    if (response.status === 401) {
+      handle401();
+      throw new Error('Sesion expirada. Redirigiendo al login...');
+    }
+
     if (!response.ok) {
-      console.error(`❌ API Error: ${response.status} ${response.statusText}`);
-    } else {
-      console.log(`✅ API Success: ${response.status}`);
+      console.error(`API Error: ${response.status} ${response.statusText}`);
     }
 
     return response;
   } catch (error) {
-    // Network errors (ERR_NETWORK_CHANGED, connection refused, etc.)
-    console.error(`❌ Network Error:`, error);
-
-    // Provide user-friendly error message
     if (error instanceof TypeError && error.message === 'Failed to fetch') {
-      throw new Error('Error de conexión. Verifica tu conexión a internet o intenta nuevamente.');
+      throw new Error('Error de conexion. Verifica tu conexion a internet o intenta nuevamente.');
     }
 
     throw error;

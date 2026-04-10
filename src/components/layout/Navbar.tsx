@@ -10,7 +10,7 @@ import { useAuth } from '../../context/AuthContext';
 export const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const isActive = (path: string) => {
@@ -61,6 +61,11 @@ export const Navbar = () => {
           </div>
 
           <div className="flex items-center gap-2">
+            {user && (
+              <span className="hidden sm:inline-block text-sm text-gray-500 mr-1">
+                {user.fullName}
+              </span>
+            )}
             <button
               onClick={handleLogout}
               className="hidden sm:inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"

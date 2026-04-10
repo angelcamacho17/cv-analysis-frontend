@@ -1,6 +1,6 @@
 /**
  * Login Page Component
- * Simple token-based login for accessing the CV Analysis system
+ * JWT-based login with email + password
  */
 
 import { useState, type FormEvent } from 'react';
@@ -9,7 +9,8 @@ import { useAuth } from '../../context/AuthContext';
 import { environment } from '../../config/environment';
 
 export const LoginPage = () => {
-  const [token, setToken] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -17,7 +18,6 @@ export const LoginPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Get the page they were trying to access, or default to home
   const from = (location.state as { from?: string })?.from || '/';
 
   const handleSubmit = async (e: FormEvent) => {
@@ -26,49 +26,37 @@ export const LoginPage = () => {
     setLoading(true);
 
     try {
-      if (!token.trim()) {
-        throw new Error('Por favor ingresa un token de acceso');
+      if (!email.trim() || !password) {
+        throw new Error('Por favor ingresa tu email y contraseña');
       }
 
-      const trimmedToken = token.trim();
-      if (trimmedToken.length !== 64) {
-        throw new Error('El token debe tener exactamente 64 caracteres.');
-      }
-
-      // Validate token with backend login API
       const response = await fetch(`${environment.apiUrl}/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ token: trimmedToken }),
+        body: JSON.stringify({ email: email.trim(), password }),
       });
 
       const text = await response.text();
       const data = text ? JSON.parse(text) : {};
 
       if (!response.ok) {
-        throw new Error(data.error || 'Token inválido. Por favor verifica tu token de acceso.');
+        if (response.status === 401) {
+          throw new Error('Email o contraseña incorrectos');
+        }
+        if (response.status === 403) {
+          throw new Error(data.error || 'Tu cuenta está inactiva o tu licencia ha expirado');
+        }
+        throw new Error(data.error || 'Error al iniciar sesión');
       }
 
-      // Token is valid, save it along with user info
-      login(data.token);
-      localStorage.setItem('cv_analysis_user', JSON.stringify(data.user));
-
-      // Redirect to the page they were trying to access
+      login(data.token, data.user);
       navigate(from, { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al iniciar sesión');
+    } finally {
       setLoading(false);
-    }
-  };
-
-  const handleUseDefaultToken = () => {
-    const defaultToken = import.meta.env.VITE_ADMIN_TOKEN || '';
-    if (defaultToken) {
-      setToken(defaultToken);
-    } else {
-      setError('No hay token por defecto configurado en el archivo .env');
     }
   };
 
@@ -93,34 +81,51 @@ export const LoginPage = () => {
             </svg>
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">CV Analysis</h1>
-          <p className="text-gray-600">Análisis de candidatos con IA</p>
+          <p className="text-gray-600">Analisis de candidatos con IA</p>
         </div>
 
         {/* Login Form */}
         <div className="bg-white rounded-2xl shadow-xl p-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">Iniciar Sesión</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">Iniciar Sesion</h2>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label htmlFor="token" className="block text-sm font-medium text-gray-700 mb-2">
-                Token de Acceso
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                Email
               </label>
               <input
-                type="password"
-                id="token"
-                value={token}
-                onChange={(e) => setToken(e.target.value)}
-                placeholder="Ingresa tu token de acceso"
+                type="email"
+                id="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="tu@email.com"
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                 disabled={loading}
                 autoFocus
+                autoComplete="email"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                Contraseña
+              </label>
+              <input
+                type="password"
+                id="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Tu contraseña"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                disabled={loading}
+                autoComplete="current-password"
               />
             </div>
 
             {error && (
               <div className="bg-red-50 border border-red-200 rounded-lg p-4">
                 <p className="text-sm text-red-800 flex items-center gap-2">
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path
                       fillRule="evenodd"
                       d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
@@ -134,7 +139,7 @@ export const LoginPage = () => {
 
             <button
               type="submit"
-              disabled={loading || !token.trim()}
+              disabled={loading || !email.trim() || !password}
               className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {loading ? (
@@ -143,34 +148,23 @@ export const LoginPage = () => {
                   <span>Verificando...</span>
                 </>
               ) : (
-                <span>Iniciar Sesión</span>
+                <span>Iniciar Sesion</span>
               )}
             </button>
           </form>
 
-          {/* Development Helper */}
-          <div className="mt-6 pt-6 border-t border-gray-200">
-            <button
-              type="button"
-              onClick={handleUseDefaultToken}
-              className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm hover:bg-gray-200 transition-colors"
-            >
-              Usar Token por Defecto (Dev)
-            </button>
-          </div>
-
           {/* Info */}
           <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
             <p className="text-xs text-blue-800">
-              <strong>Información:</strong> Este sistema utiliza autenticación basada en tokens.
-              Contacta al administrador para obtener tu token de acceso.
+              <strong>Informacion:</strong> Ingresa con tu email y contraseña.
+              Contacta al administrador si no tienes una cuenta.
             </p>
           </div>
         </div>
 
         {/* Footer */}
         <p className="text-center text-sm text-gray-500 mt-6">
-          Sistema de Análisis de CVs con Claude AI
+          Sistema de Analisis de CVs con Claude AI
         </p>
       </div>
     </div>
