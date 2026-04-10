@@ -70,6 +70,7 @@ export interface ProgressEvent {
   failed?: number;
   promptSize?: number;
   promptSizeKB?: number;
+  timestamp?: string;
 }
 
 export interface FinalResult {

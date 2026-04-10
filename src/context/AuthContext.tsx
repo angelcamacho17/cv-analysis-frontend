@@ -17,6 +17,9 @@ export interface AuthUser {
   totalCandidatesProcessed: number;
   createdAt: string;
   lastLogin: string;
+  plan: 'free' | 'premium';
+  monthlyLimit: number;
+  billingPeriodStart: string;
 }
 
 interface AuthContextType {

@@ -64,6 +64,7 @@ export const searchCandidates = async (
   if (params.maxScore !== undefined) queryParams.append('maxScore', params.maxScore.toString());
   if (params.category && params.category !== 'all') queryParams.append('category', params.category);
   if (params.analysisId) queryParams.append('analysisId', params.analysisId);
+  if (params.jobPositionId) queryParams.append('jobPositionId', params.jobPositionId.toString());
   if (params.limit) queryParams.append('limit', params.limit.toString());
 
   const response = await apiGet<any>(`/candidates/search?${queryParams.toString()}`);

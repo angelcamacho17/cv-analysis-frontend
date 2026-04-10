@@ -102,6 +102,7 @@ export interface CandidateSearchParams {
   maxScore?: number;
   category?: CandidateCategory | 'all';
   analysisId?: string;
+  jobPositionId?: number;
   limit?: number;
 }
 

@@ -1,17 +1,23 @@
 /**
  * Navbar Component
- * Simple navigation bar with links to main sections
+ * Navigation bar with user info and usage indicator
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { getUsage, type UsageData } from '../../services/usage.service';
 
 export const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { logout, user } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [usage, setUsage] = useState<UsageData | null>(null);
+
+  useEffect(() => {
+    getUsage().then(setUsage).catch(() => {});
+  }, [location.pathname]);
 
   const isActive = (path: string) => {
     if (path === '/') return location.pathname === '/';
@@ -28,6 +34,9 @@ export const Navbar = () => {
     { to: '/positions', label: 'Posiciones' },
     { to: '/candidates', label: 'Candidatos' },
   ];
+
+  const usagePercent = usage ? Math.min((usage.used / usage.limit) * 100, 100) : 0;
+  const usageBarColor = usagePercent >= 90 ? 'bg-red-500' : usagePercent >= 70 ? 'bg-yellow-500' : 'bg-blue-500';
 
   return (
     <nav className="bg-white border-b border-gray-200 sticky top-0 z-30">
@@ -60,9 +69,29 @@ export const Navbar = () => {
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
+            {/* Usage indicator */}
+            {usage && (
+              <div className="hidden sm:flex items-center gap-2">
+                <div className="text-right">
+                  <p className="text-xs text-gray-500 leading-none">
+                    {usage.used}/{usage.limit} CVs
+                  </p>
+                  <p className="text-xs text-gray-400 leading-none mt-0.5 capitalize">
+                    Plan {usage.plan}
+                  </p>
+                </div>
+                <div className="w-20 h-2 bg-gray-200 rounded-full overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all ${usageBarColor}`}
+                    style={{ width: `${usagePercent}%` }}
+                  />
+                </div>
+              </div>
+            )}
+
             {user && (
-              <span className="hidden sm:inline-block text-sm text-gray-500 mr-1">
+              <span className="hidden sm:inline-block text-sm text-gray-500">
                 {user.fullName}
               </span>
             )}
@@ -97,6 +126,21 @@ export const Navbar = () => {
       {mobileOpen && (
         <div className="sm:hidden border-t border-gray-200 bg-white">
           <div className="px-2 pt-2 pb-3 space-y-1">
+            {/* Mobile usage bar */}
+            {usage && (
+              <div className="px-3 py-2 mb-1">
+                <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
+                  <span>{usage.used}/{usage.limit} CVs</span>
+                  <span className="capitalize">Plan {usage.plan}</span>
+                </div>
+                <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all ${usageBarColor}`}
+                    style={{ width: `${usagePercent}%` }}
+                  />
+                </div>
+              </div>
+            )}
             {navLinks.map((link) => (
               <Link
                 key={link.to}

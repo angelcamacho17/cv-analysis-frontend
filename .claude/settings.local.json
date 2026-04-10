@@ -33,7 +33,14 @@
       "Bash(curl -s \"https://cv-analysis-api.onrender.com/api/analyses?page=1&limit=10\" -H \"Authorization: Bearer f7014ba0103ac7d68f13d82e672ccadb43dc5b0c0048c85bce286710621ace39\")",
       "Bash(curl -s \"https://cv-analysis-api.onrender.com/api/analyses/2\" -H \"Authorization: Bearer f7014ba0103ac7d68f13d82e672ccadb43dc5b0c0048c85bce286710621ace39\")",
       "Bash(npm run:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(ls:*)",
+      "Bash(TOKEN=\"f7014ba0103ac7d68f13d82e672ccadb43dc5b0c0048c85bce286710621ace39\" && curl -s -o /dev/null -w \"HTTP Status: %{http_code}\\\\nContent-Type: %{content_type}\\\\n\" -X POST \"https://cv-analysis-api.onrender.com/api/analyze-stream\" -H \"Authorization: Bearer $TOKEN\" -F \"jobPositionId=1\" 2>&1)",
+      "Bash(git push:*)",
+      "Bash(curl:*)",
+      "WebFetch(domain:render.com)",
+      "Bash(lsof:*)",
+      "Bash(git checkout:*)"
     ],
     "deny": [],
     "ask": []

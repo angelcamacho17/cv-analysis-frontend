@@ -50,6 +50,15 @@ export const analyzeCVWithProgress = async (
       return;
     }
 
+    if (response.status === 403) {
+      const errorData = await response.json().catch(() => ({}));
+      if (errorData.limit) {
+        const err = new Error(errorData.error || 'Limite mensual alcanzado') as any;
+        err.limitData = errorData;
+        throw err;
+      }
+    }
+
     if (!response.ok) {
       const errorText = await response.text().catch(() => '');
       throw new Error(`HTTP error ${response.status}: ${errorText || response.statusText}`);
