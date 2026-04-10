@@ -45,6 +45,7 @@ export const getJsonHeaders = (): Record<string, string> => {
 const handle401 = () => {
   localStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem(USER_KEY);
+  localStorage.setItem('session_expired', '1');
   window.location.href = '/login';
 };
 

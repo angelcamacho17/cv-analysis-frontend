@@ -3,7 +3,7 @@
  * Sets up routing and layout for the CV Analysis application
  */
 
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { Layout } from './components/layout/Layout';
 import { CVAnalysisPage } from './components/cv-analysis/CVAnalysisPage';
@@ -13,6 +13,7 @@ import { JobPositionsPage } from './components/job-positions/JobPositionsPage';
 import { PositionAnalytics } from './components/job-positions/PositionAnalytics';
 import { LoginPage } from './components/auth/LoginPage';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
+import { NotFoundPage } from './components/auth/NotFoundPage';
 
 function App() {
   return (
@@ -74,8 +75,8 @@ function App() {
             }
           />
 
-          {/* Catch all - redirect to home */}
-          <Route path="*" element={<Navigate to="/" replace />} />
+          {/* 404 */}
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

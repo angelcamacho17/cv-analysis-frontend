@@ -24,21 +24,10 @@ const ScoreBar = ({ score }: { score: number }) => {
 // Avatar with initials
 const Avatar = ({ name, rank }: { name: string; rank?: number }) => {
   const initials = name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
-  const colors = ['bg-blue-600', 'bg-emerald-600', 'bg-violet-600', 'bg-amber-600', 'bg-rose-600', 'bg-cyan-600', 'bg-indigo-600', 'bg-teal-600'];
-  const colorIndex = name.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0) % colors.length;
 
   return (
-    <div className="relative flex-shrink-0">
-      <div className={`w-10 h-10 text-sm ${colors[colorIndex]} text-white rounded-full flex items-center justify-center font-semibold`}>
-        {initials}
-      </div>
-      {rank !== undefined && rank <= 3 && (
-        <div className={`absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${
-          rank === 1 ? 'bg-amber-400 text-white' : 'bg-gray-300 text-gray-700'
-        }`}>
-          {rank}
-        </div>
-      )}
+    <div className="flex-shrink-0 w-8 h-8 bg-gray-100 text-gray-500 rounded-full flex items-center justify-center text-xs font-medium">
+      {rank !== undefined ? rank : initials}
     </div>
   );
 };

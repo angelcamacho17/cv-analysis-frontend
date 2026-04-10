@@ -14,6 +14,11 @@ export const LoginPage = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [sessionExpired] = useState(() => {
+    const expired = localStorage.getItem('session_expired');
+    if (expired) localStorage.removeItem('session_expired');
+    return !!expired;
+  });
 
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -88,6 +93,17 @@ export const LoginPage = () => {
         {/* Login Form */}
         <div className="bg-white rounded-2xl shadow-xl p-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">Iniciar Sesion</h2>
+
+          {sessionExpired && (
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-5">
+              <p className="text-sm text-amber-800 flex items-center gap-2">
+                <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Tu sesion ha expirado. Inicia sesion nuevamente.
+              </p>
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>

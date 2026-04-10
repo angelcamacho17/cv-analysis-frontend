@@ -46,6 +46,7 @@ export const analyzeCVWithProgress = async (
     if (response.status === 401) {
       localStorage.removeItem('cv_analysis_token');
       localStorage.removeItem('cv_analysis_user');
+      localStorage.setItem('session_expired', '1');
       window.location.href = '/login';
       return;
     }
