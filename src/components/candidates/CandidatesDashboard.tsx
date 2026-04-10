@@ -8,6 +8,7 @@ import { Link } from 'react-router-dom';
 import { searchCandidates } from '../../services/analyses.service';
 import { getJobPositions } from '../../services/job-positions.service';
 import type { CandidateDetail, CandidateCategory } from '../../types/analyses';
+import { DownloadCVButton } from '../shared/DownloadCVButton';
 import type { JobPosition } from '../../types/job-positions';
 
 // Score bar
@@ -173,13 +174,14 @@ export const CandidatesDashboard = () => {
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-2">
                 <h1 className="text-3xl font-bold text-gray-900">{selectedCandidate.nombre}</h1>
+                <DownloadCVButton size="md" />
                 <span className={`px-3 py-1 text-sm rounded-lg ${getCategoryBgColor(selectedCandidate.categoria)}`}>
                   {getCategoryIcon(selectedCandidate.categoria)} {getCategoryLabel(selectedCandidate.categoria)}
                 </span>
               </div>
               <div className="space-y-1">
                 <p className="text-gray-600">
-                  <span className="blur-[2px]">{selectedCandidate.email}</span>
+                  {selectedCandidate.email}
                 </p>
                 {selectedCandidate.telefono && <p className="text-gray-600">{selectedCandidate.telefono}</p>}
               </div>
@@ -380,6 +382,7 @@ export const CandidatesDashboard = () => {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <h3 className={`font-semibold text-gray-900 truncate ${isTop1 ? 'text-base' : 'text-sm'}`}>{candidate.nombre}</h3>
+                        <DownloadCVButton />
                         <span className={`px-2 py-0.5 text-[10px] font-semibold rounded-full flex-shrink-0 ${getCategoryBgColor(candidate.categoria)}`}>
                           {getCategoryLabel(candidate.categoria)}
                         </span>

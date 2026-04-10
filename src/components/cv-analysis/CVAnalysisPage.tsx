@@ -10,6 +10,7 @@ import { getJobPositions } from '../../services/job-positions.service';
 import { getUsage, type UsageData } from '../../services/usage.service';
 import { parseJobPosition } from '../../types/job-positions';
 import { JobPositionModal } from '../job-positions/JobPositionModal';
+import { DownloadCVButton } from '../shared/DownloadCVButton';
 import { transformAnalysisResponse } from '../../utils/analysis-transformer';
 import type { JobPosition } from '../../types/job-positions';
 import type {
@@ -293,90 +294,109 @@ export const CVAnalysisPage = () => {
 
   return (
     <div>
-      {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Analisis de CVs</h1>
-        {usage && (
-          <p className="text-sm text-gray-400 mt-1">
-            {usage.remaining} CVs restantes este mes · Plan {usage.plan}
-          </p>
-        )}
-      </div>
+      {/* Header with action button */}
+      {!analysisResult && !loading && (
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Analisis de CVs</h1>
+            {usage && (
+              <p className="text-sm text-gray-400 mt-1">
+                {usage.remaining} CVs restantes este mes · Plan {usage.plan}
+              </p>
+            )}
+          </div>
+          <button
+            onClick={analyzeResumes}
+            disabled={!canAnalyze}
+            className={`sm:w-auto px-8 py-3 rounded-xl font-semibold text-sm transition-all flex-shrink-0 ${
+              !canAnalyze
+                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                : 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm hover:shadow-md active:scale-[0.98]'
+            }`}
+          >
+            Analizar {pdfFiles.length > 0 ? `${pdfFiles.length} CV${pdfFiles.length > 1 ? 's' : ''}` : 'Candidatos'}
+          </button>
+        </div>
+      )}
+
+      {(analysisResult || loading) && (
+        <div className="mb-6">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Analisis de CVs</h1>
+        </div>
+      )}
 
       {/* Form */}
       {!analysisResult && !loading && (
-        <div className="max-w-4xl space-y-6">
-          {/* Step 1: Position */}
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-bold flex-shrink-0">1</div>
-              <h2 className="text-lg font-semibold text-gray-900">Selecciona la posicion</h2>
-            </div>
-
-            {loadingPositions ? (
-              <div className="animate-pulse space-y-2">
-                <div className="bg-gray-200 rounded-lg h-10 w-full" />
+        <div className="space-y-6">
+          {/* Two-column layout: Position selector + Upload */}
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+            {/* Step 1: Position (narrower) */}
+            <div className="lg:col-span-2 bg-white rounded-xl border border-gray-200 p-5">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold flex-shrink-0">1</div>
+                <h2 className="text-sm font-semibold text-gray-900">Posicion</h2>
               </div>
-            ) : positions.length === 0 ? (
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                <p className="text-sm text-yellow-800 mb-3">
-                  No hay posiciones de trabajo. Crea una para comenzar.
-                </p>
-                <button
-                  type="button"
-                  onClick={() => setShowPositionModal(true)}
-                  className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors text-sm font-medium"
-                >
-                  Crear Posicion
-                </button>
-              </div>
-            ) : (
-              <div>
-                <select
-                  value={selectedPositionId || ''}
-                  onChange={(e) => setSelectedPositionId(Number(e.target.value) || null)}
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                  aria-label="Seleccionar posicion de trabajo"
-                >
-                  <option value="">Selecciona una posicion...</option>
-                  {positions.map((position) => (
-                    <option key={position.id} value={position.id}>
-                      {position.title} {position.department ? `· ${position.department}` : ''}
-                    </option>
-                  ))}
-                </select>
 
-                {parsedPosition && (
-                  <div className="mt-3 flex flex-wrap gap-1.5">
-                    {parsedPosition.requiredSkills.map((skill, idx) => (
-                      <span key={idx} className="px-2.5 py-1 bg-blue-50 text-blue-700 text-xs font-medium rounded-full border border-blue-200">
-                        {skill}
-                      </span>
+              {loadingPositions ? (
+                <div className="animate-pulse">
+                  <div className="bg-gray-200 rounded-lg h-10 w-full" />
+                </div>
+              ) : positions.length === 0 ? (
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                  <p className="text-xs text-yellow-800 mb-2">No hay posiciones. Crea una para comenzar.</p>
+                  <button
+                    type="button"
+                    onClick={() => setShowPositionModal(true)}
+                    className="px-3 py-1.5 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors text-xs font-medium"
+                  >
+                    Crear Posicion
+                  </button>
+                </div>
+              ) : (
+                <div>
+                  <select
+                    value={selectedPositionId || ''}
+                    onChange={(e) => setSelectedPositionId(Number(e.target.value) || null)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                    aria-label="Seleccionar posicion de trabajo"
+                  >
+                    <option value="">Selecciona una posicion...</option>
+                    {positions.map((position) => (
+                      <option key={position.id} value={position.id}>
+                        {position.title} {position.department ? `· ${position.department}` : ''}
+                      </option>
                     ))}
-                    {parsedPosition.desirableSkills.length > 0 && parsedPosition.desirableSkills.map((skill, idx) => (
-                      <span key={`d-${idx}`} className="px-2.5 py-1 bg-gray-50 text-gray-500 text-xs rounded-full border border-gray-200">
-                        {skill}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
+                  </select>
 
-          {/* Step 2: Upload */}
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 ${
-                selectedPositionId ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-400'
-              }`}>2</div>
-              <div className="flex-1">
-                <h2 className="text-lg font-semibold text-gray-900">Sube los CVs</h2>
-              </div>
-              {pdfFiles.length > 0 && (
-                <span className="text-sm text-gray-400">{pdfFiles.length}/50</span>
+                  {parsedPosition && (
+                    <div className="mt-3 flex flex-wrap gap-1">
+                      {parsedPosition.requiredSkills.map((skill, idx) => (
+                        <span key={idx} className="px-2 py-0.5 bg-blue-50 text-blue-700 text-[11px] font-medium rounded-full border border-blue-200">
+                          {skill}
+                        </span>
+                      ))}
+                      {parsedPosition.desirableSkills.length > 0 && parsedPosition.desirableSkills.map((skill, idx) => (
+                        <span key={`d-${idx}`} className="px-2 py-0.5 bg-gray-50 text-gray-500 text-[11px] rounded-full border border-gray-200">
+                          {skill}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
               )}
             </div>
+
+            {/* Step 2: Upload (wider) */}
+            <div className="lg:col-span-3 bg-white rounded-xl border border-gray-200 p-5">
+              <div className="flex items-center gap-2 mb-3">
+                <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${
+                  selectedPositionId ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-400'
+                }`}>2</div>
+                <h2 className="text-sm font-semibold text-gray-900">CVs en PDF</h2>
+                {pdfFiles.length > 0 && (
+                  <span className="text-xs text-gray-400 ml-auto">{pdfFiles.length}/50</span>
+                )}
+              </div>
 
             {/* Drop zone */}
             <div
@@ -462,6 +482,7 @@ export const CVAnalysisPage = () => {
               </div>
             )}
           </div>
+          </div>
 
           {/* Usage bar */}
           {usage && (
@@ -514,18 +535,6 @@ export const CVAnalysisPage = () => {
             </div>
           )}
 
-          {/* Action button */}
-          <button
-            onClick={analyzeResumes}
-            disabled={!canAnalyze}
-            className={`w-full sm:w-auto px-10 py-3.5 rounded-xl font-semibold text-sm transition-all ${
-              !canAnalyze
-                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                : 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm hover:shadow-md active:scale-[0.98]'
-            }`}
-          >
-            Analizar {pdfFiles.length > 0 ? `${pdfFiles.length} CV${pdfFiles.length > 1 ? 's' : ''}` : 'Candidatos'}
-          </button>
         </div>
       )}
 
@@ -665,6 +674,7 @@ export const CVAnalysisPage = () => {
                       </svg>
                       <div>
                         <h3 className="text-lg font-bold text-gray-900">{candidato.nombre}</h3>
+                        <DownloadCVButton />
                         {isExpanded && (
                           <div className="text-sm text-gray-500 space-y-0.5 mt-1">
                             <div>{candidato.email}</div>

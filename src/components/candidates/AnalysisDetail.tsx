@@ -7,6 +7,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getAnalysisDetail } from '../../services/analyses.service';
 import type { AnalysisDetail, CandidateDetail, CandidateCategory } from '../../types/analyses';
+import { DownloadCVButton } from '../shared/DownloadCVButton';
 
 export const AnalysisDetailPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -276,6 +277,7 @@ export const AnalysisDetailPage = () => {
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
                         <h3 className="text-lg font-semibold text-gray-900">{candidate.nombre}</h3>
+                        <DownloadCVButton />
                         <span className={`px-2 py-1 text-xs rounded ${getCategoryBgColor(candidate.categoria)}`}>
                           {getCategoryIcon(candidate.categoria)} {getCategoryLabel(candidate.categoria)}
                         </span>
