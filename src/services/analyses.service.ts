@@ -70,11 +70,12 @@ export const searchCandidates = async (
   const response = await apiGet<any>(`/candidates/search?${queryParams.toString()}`);
 
   // Transform snake_case backend response to camelCase frontend format
+  const defaultPagination = { page: params.page || 1, limit: params.limit || 10, total: 0, totalPages: 0 };
   return {
     success: response.success,
     data: (response.candidates || response.data || []).map(transformCandidate),
     count: response.count || 0,
-    pagination: response.pagination,
+    pagination: response.pagination || defaultPagination,
   };
 };
 

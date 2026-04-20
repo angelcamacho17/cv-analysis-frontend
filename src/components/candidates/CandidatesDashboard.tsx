@@ -93,7 +93,7 @@ export const CandidatesDashboard = () => {
       });
       if (response.success) {
         setCandidates(response.data);
-        setPagination(response.pagination);
+        setPagination(response.pagination || { page: 1, limit: 10, total: 0, totalPages: 0 });
       }
     } catch (err) {
       console.error('Error loading candidates:', err);
