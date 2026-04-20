@@ -7,7 +7,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { searchCandidates } from '../../services/analyses.service';
 import { getJobPositions } from '../../services/job-positions.service';
-import type { CandidateDetail, CandidateCategory } from '../../types/analyses';
+import type { CandidateDetail, CandidateCategory, PaginationInfo } from '../../types/analyses';
 import { DownloadCVButton } from '../shared/DownloadCVButton';
 import type { JobPosition } from '../../types/job-positions';
 
@@ -48,10 +48,11 @@ const CardSkeleton = () => (
 );
 
 export const CandidatesDashboard = () => {
-  const [allCandidates, setAllCandidates] = useState<CandidateDetail[]>([]);
+  const [candidates, setCandidates] = useState<CandidateDetail[]>([]);
   const [selectedCandidate, setSelectedCandidate] = useState<CandidateDetail | null>(null);
   const [positions, setPositions] = useState<JobPosition[]>([]);
   const [loading, setLoading] = useState(true);
+  const [pagination, setPagination] = useState<PaginationInfo>({ page: 1, limit: 10, total: 0, totalPages: 0 });
 
   // Filters
   const [filterPosition, setFilterPosition] = useState<string>('');
@@ -59,34 +60,17 @@ export const CandidatesDashboard = () => {
   const [filterMinScore, setFilterMinScore] = useState<string>('');
   const [filterMaxScore, setFilterMaxScore] = useState<string>('');
 
-  // Client-side filtering
-  const filteredCandidates = allCandidates.filter((c) => {
-    if (filterCategory && c.categoria !== filterCategory) return false;
-    if (filterMinScore && c.score < Number(filterMinScore)) return false;
-    if (filterMaxScore && c.score > Number(filterMaxScore)) return false;
-    return true;
-  });
-
-  // Pagination
-  const pageSize = 15;
+  // Page state
   const [page, setPage] = useState(1);
-  const totalPages = Math.ceil(filteredCandidates.length / pageSize);
-  const paginatedCandidates = filteredCandidates.slice((page - 1) * pageSize, page * pageSize);
 
   useEffect(() => {
     loadPositions();
-    fetchCandidates();
   }, []);
 
-  // Re-fetch from server when position filter changes (position is not on CandidateDetail)
+  // Re-fetch from server when any filter or page changes
   useEffect(() => {
-    fetchCandidates(filterPosition);
-  }, [filterPosition]);
-
-  // Reset page when client-side filters change
-  useEffect(() => {
-    setPage(1);
-  }, [filterCategory, filterMinScore, filterMaxScore]);
+    fetchCandidates();
+  }, [filterPosition, filterCategory, filterMinScore, filterMaxScore, page]);
 
   const loadPositions = async () => {
     try {
@@ -96,14 +80,21 @@ export const CandidatesDashboard = () => {
     }
   };
 
-  const fetchCandidates = async (positionId?: string) => {
+  const fetchCandidates = async () => {
     setLoading(true);
     try {
       const response = await searchCandidates({
-        jobPositionId: positionId ? Number(positionId) : undefined,
-        limit: 500,
+        jobPositionId: filterPosition ? Number(filterPosition) : undefined,
+        category: filterCategory ? (filterCategory as CandidateCategory) : undefined,
+        minScore: filterMinScore ? Number(filterMinScore) : undefined,
+        maxScore: filterMaxScore ? Number(filterMaxScore) : undefined,
+        page,
+        limit: 10,
       });
-      if (response.success) setAllCandidates(response.data);
+      if (response.success) {
+        setCandidates(response.data);
+        setPagination(response.pagination);
+      }
     } catch (err) {
       console.error('Error loading candidates:', err);
     } finally {
@@ -268,7 +259,7 @@ export const CandidatesDashboard = () => {
             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Posicion</label>
             <select
               value={filterPosition}
-              onChange={(e) => setFilterPosition(e.target.value)}
+              onChange={(e) => { setFilterPosition(e.target.value); setPage(1); }}
               className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white transition-colors"
             >
               <option value="">Todas las posiciones</option>
@@ -281,7 +272,7 @@ export const CandidatesDashboard = () => {
             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Categoria</label>
             <select
               value={filterCategory}
-              onChange={(e) => setFilterCategory(e.target.value)}
+              onChange={(e) => { setFilterCategory(e.target.value); setPage(1); }}
               className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white transition-colors"
             >
               <option value="">Todas</option>
@@ -298,7 +289,7 @@ export const CandidatesDashboard = () => {
               <input
                 type="number"
                 value={filterMinScore}
-                onChange={(e) => setFilterMinScore(e.target.value)}
+                onChange={(e) => { setFilterMinScore(e.target.value); setPage(1); }}
                 min="0"
                 max="100"
                 placeholder="Min"
@@ -308,7 +299,7 @@ export const CandidatesDashboard = () => {
               <input
                 type="number"
                 value={filterMaxScore}
-                onChange={(e) => setFilterMaxScore(e.target.value)}
+                onChange={(e) => { setFilterMaxScore(e.target.value); setPage(1); }}
                 min="0"
                 max="100"
                 placeholder="Max"
@@ -337,11 +328,11 @@ export const CandidatesDashboard = () => {
         <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
           <p className="text-sm text-gray-500">
             {loading ? 'Cargando...' : (
-              <>{filteredCandidates.length} candidato{filteredCandidates.length !== 1 ? 's' : ''} encontrado{filteredCandidates.length !== 1 ? 's' : ''}</>
+              <>Mostrando {candidates.length} de {pagination.total} candidato{pagination.total !== 1 ? 's' : ''}</>
             )}
           </p>
-          {totalPages > 1 && (
-            <p className="text-xs text-gray-400">Pagina {page} de {totalPages}</p>
+          {pagination.totalPages > 1 && (
+            <p className="text-xs text-gray-400">Pagina {pagination.page} de {pagination.totalPages}</p>
           )}
         </div>
 
@@ -352,10 +343,10 @@ export const CandidatesDashboard = () => {
             </div>
           )}
 
-          {!loading && paginatedCandidates.length > 0 && (
+          {!loading && candidates.length > 0 && (
             <div className="space-y-2">
-              {paginatedCandidates.map((candidate, i) => {
-                const globalIndex = (page - 1) * pageSize + i;
+              {candidates.map((candidate, i) => {
+                const globalIndex = (pagination.page - 1) * pagination.limit + i;
                 const isTop1 = globalIndex === 0 && !hasActiveFilters;
                 return (
                   <div
@@ -391,7 +382,7 @@ export const CandidatesDashboard = () => {
             </div>
           )}
 
-          {!loading && filteredCandidates.length === 0 && (
+          {!loading && candidates.length === 0 && (
             <div className="text-center py-16">
               <svg className="w-12 h-12 text-gray-200 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -409,19 +400,19 @@ export const CandidatesDashboard = () => {
         </div>
 
         {/* Pagination */}
-        {!loading && totalPages > 1 && (
+        {!loading && pagination.totalPages > 1 && (
           <div className="px-6 py-4 border-t border-gray-100 flex justify-center gap-2">
             <button
               onClick={() => setPage(p => Math.max(1, p - 1))}
-              disabled={page === 1}
+              disabled={pagination.page <= 1}
               className="px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
               Anterior
             </button>
-            <span className="px-4 py-2 text-sm text-gray-500">Pagina {page} de {totalPages}</span>
+            <span className="px-4 py-2 text-sm text-gray-500">Pagina {pagination.page} de {pagination.totalPages}</span>
             <button
-              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-              disabled={page === totalPages}
+              onClick={() => setPage(p => Math.min(pagination.totalPages, p + 1))}
+              disabled={pagination.page >= pagination.totalPages}
               className="px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
               Siguiente

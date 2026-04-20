@@ -95,6 +95,13 @@ export interface AnalysisDetailResponse {
   data: AnalysisDetail;
 }
 
+export interface PaginationInfo {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
 export interface CandidateSearchParams {
   name?: string;
   email?: string;
@@ -103,13 +110,15 @@ export interface CandidateSearchParams {
   category?: CandidateCategory | 'all';
   analysisId?: string;
   jobPositionId?: number;
+  page?: number;
   limit?: number;
 }
 
 export interface CandidateSearchResponse {
   success: boolean;
   data: CandidateDetail[];
-  total: number;
+  count: number;
+  pagination: PaginationInfo;
 }
 
 export interface Statistics {

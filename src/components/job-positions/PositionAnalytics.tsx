@@ -11,7 +11,7 @@ import { searchCandidates } from '../../services/analyses.service';
 import { parseJobPosition } from '../../types/job-positions';
 import { DownloadCVButton } from '../shared/DownloadCVButton';
 import type { JobPositionAnalyticsResponse, JobPositionAnalysesResponse } from '../../types/job-positions';
-import type { CandidateDetail, CandidateCategory } from '../../types/analyses';
+import type { CandidateDetail, CandidateCategory, PaginationInfo } from '../../types/analyses';
 
 type CategoryFilter = 'all' | CandidateCategory;
 
@@ -25,6 +25,7 @@ export const PositionAnalytics = () => {
   const [loading, setLoading] = useState(true);
   const [loadingCandidates, setLoadingCandidates] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [pagination, setPagination] = useState<PaginationInfo>({ page: 1, limit: 10, total: 0, totalPages: 0 });
 
   // Filters
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('all');
@@ -34,14 +35,19 @@ export const PositionAnalytics = () => {
 
   // Pagination
   const [page, setPage] = useState(1);
-  const pageSize = 10;
 
   useEffect(() => {
     if (id) {
       loadData(parseInt(id));
-      loadCandidates(parseInt(id));
     }
   }, [id]);
+
+  // Re-fetch candidates when filters or page change
+  useEffect(() => {
+    if (id) {
+      loadCandidates(parseInt(id));
+    }
+  }, [id, categoryFilter, analysisFilter, searchText, page]);
 
   const loadData = async (positionId: number) => {
     try {
@@ -65,9 +71,17 @@ export const PositionAnalytics = () => {
   const loadCandidates = async (positionId: number) => {
     try {
       setLoadingCandidates(true);
-      const response = await searchCandidates({ jobPositionId: positionId, limit: 500 });
+      const response = await searchCandidates({
+        jobPositionId: positionId,
+        category: categoryFilter !== 'all' ? categoryFilter : undefined,
+        analysisId: analysisFilter || undefined,
+        name: searchText.trim() || undefined,
+        page,
+        limit: 10,
+      });
       if (response.success) {
         setCandidates(response.data);
+        setPagination(response.pagination);
       }
     } catch (err) {
       console.error('Error loading candidates:', err);
@@ -76,31 +90,14 @@ export const PositionAnalytics = () => {
     }
   };
 
-  // Apply filters
-  const filteredCandidates = candidates.filter((c) => {
-    if (categoryFilter !== 'all' && c.categoria !== categoryFilter) return false;
-    if (analysisFilter && c.analysisId !== analysisFilter) return false;
-    if (searchText.trim()) {
-      const text = searchText.toLowerCase();
-      if (!c.nombre.toLowerCase().includes(text) && !c.email.toLowerCase().includes(text)) return false;
-    }
-    return true;
-  });
-
-  const totalPages = Math.ceil(filteredCandidates.length / pageSize);
-  const paginatedCandidates = filteredCandidates.slice((page - 1) * pageSize, page * pageSize);
-
-  // Reset page when filters change
-  useEffect(() => {
-    setPage(1);
-  }, [categoryFilter, analysisFilter, searchText]);
-
   const handleCategoryClick = (category: CategoryFilter) => {
     setCategoryFilter(categoryFilter === category ? 'all' : category);
+    setPage(1);
   };
 
   const handleAnalysisClick = (analysisId: string) => {
     setAnalysisFilter(analysisFilter === analysisId ? '' : analysisId);
+    setPage(1);
   };
 
   const getScoreColor = (score: number): string => {
@@ -313,7 +310,7 @@ export const PositionAnalytics = () => {
             </button>
           )}
           <button
-            onClick={() => { setCategoryFilter('all'); setAnalysisFilter(''); setSearchText(''); }}
+            onClick={() => { setCategoryFilter('all'); setAnalysisFilter(''); setSearchText(''); setPage(1); }}
             className="px-3 py-1 text-xs text-gray-500 hover:text-gray-700 underline"
           >
             Limpiar todos
@@ -325,12 +322,12 @@ export const PositionAnalytics = () => {
       <div className="bg-white rounded-xl border border-gray-200">
         <div className="p-5 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <h3 className="text-lg font-bold text-gray-900">
-            Candidatos <span className="text-sm font-normal text-gray-400">({filteredCandidates.length})</span>
+            Candidatos <span className="text-sm font-normal text-gray-400">({pagination.total})</span>
           </h3>
           <input
             type="text"
             value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
+            onChange={(e) => { setSearchText(e.target.value); setPage(1); }}
             placeholder="Buscar por nombre o email..."
             className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:w-64"
           />
@@ -349,9 +346,9 @@ export const PositionAnalytics = () => {
               </div>
             ))}
           </div>
-        ) : paginatedCandidates.length > 0 ? (
+        ) : candidates.length > 0 ? (
           <div className="divide-y">
-            {paginatedCandidates.map((candidate, idx) => (
+            {candidates.map((candidate, idx) => (
               <div key={candidate.id || idx} className="p-6 hover:bg-gray-50 transition-colors">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
@@ -428,21 +425,21 @@ export const PositionAnalytics = () => {
         )}
 
         {/* Pagination */}
-        {totalPages > 1 && (
+        {pagination.totalPages > 1 && (
           <div className="p-4 border-t border-gray-100 flex items-center justify-center gap-2">
             <button
-              onClick={() => setPage(page - 1)}
-              disabled={page === 1}
+              onClick={() => setPage(p => Math.max(1, p - 1))}
+              disabled={pagination.page <= 1}
               className="px-4 py-2 border rounded-lg text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Anterior
             </button>
             <span className="px-4 py-2 text-sm text-gray-700">
-              Pagina {page} de {totalPages}
+              Mostrando {candidates.length} de {pagination.total} &middot; Pagina {pagination.page} de {pagination.totalPages}
             </span>
             <button
-              onClick={() => setPage(page + 1)}
-              disabled={page === totalPages}
+              onClick={() => setPage(p => Math.min(pagination.totalPages, p + 1))}
+              disabled={pagination.page >= pagination.totalPages}
               className="px-4 py-2 border rounded-lg text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Siguiente

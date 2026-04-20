@@ -17,7 +17,6 @@ import type {
   CandidateSearchParams,
   CandidateSearchResponse,
   StatisticsResponse,
-  CandidateDetail,
 } from '../types/analyses';
 
 /**
@@ -65,6 +64,7 @@ export const searchCandidates = async (
   if (params.category && params.category !== 'all') queryParams.append('category', params.category);
   if (params.analysisId) queryParams.append('analysisId', params.analysisId);
   if (params.jobPositionId) queryParams.append('jobPositionId', params.jobPositionId.toString());
+  if (params.page) queryParams.append('page', params.page.toString());
   if (params.limit) queryParams.append('limit', params.limit.toString());
 
   const response = await apiGet<any>(`/candidates/search?${queryParams.toString()}`);
@@ -73,19 +73,28 @@ export const searchCandidates = async (
   return {
     success: response.success,
     data: (response.candidates || response.data || []).map(transformCandidate),
-    total: response.total || response.count || 0,
+    count: response.count || 0,
+    pagination: response.pagination,
   };
 };
 
 /**
  * Gets top-scoring candidates across all analyses
  */
-export const getTopCandidates = async (limit: number = 10): Promise<CandidateDetail[]> => {
-  const response = await apiGet<any>(`/candidates/top?limit=${limit}`);
+export const getTopCandidates = async (
+  page: number = 1,
+  limit: number = 10
+): Promise<CandidateSearchResponse> => {
+  const response = await apiGet<any>(`/candidates/top?page=${page}&limit=${limit}`);
   const candidates = response.candidates || response.data || [];
 
   // Transform snake_case backend response to camelCase frontend format
-  return candidates.map(transformCandidate);
+  return {
+    success: response.success,
+    data: candidates.map(transformCandidate),
+    count: response.count || 0,
+    pagination: response.pagination,
+  };
 };
 
 /**
