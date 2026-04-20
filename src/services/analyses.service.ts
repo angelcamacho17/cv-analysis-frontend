@@ -59,11 +59,11 @@ export const searchCandidates = async (
 
   if (params.name) queryParams.append('name', params.name);
   if (params.email) queryParams.append('email', params.email);
-  if (params.minScore !== undefined) queryParams.append('minScore', params.minScore.toString());
-  if (params.maxScore !== undefined) queryParams.append('maxScore', params.maxScore.toString());
+  if (params.minScore !== undefined) queryParams.append('min_score', params.minScore.toString());
+  if (params.maxScore !== undefined) queryParams.append('max_score', params.maxScore.toString());
   if (params.category && params.category !== 'all') queryParams.append('category', params.category);
-  if (params.analysisId) queryParams.append('analysisId', params.analysisId);
-  if (params.jobPositionId) queryParams.append('jobPositionId', params.jobPositionId.toString());
+  if (params.analysisId) queryParams.append('analysis_id', params.analysisId);
+  if (params.jobPositionId) queryParams.append('job_position_id', params.jobPositionId.toString());
   if (params.page) queryParams.append('page', params.page.toString());
   if (params.limit) queryParams.append('limit', params.limit.toString());
 
