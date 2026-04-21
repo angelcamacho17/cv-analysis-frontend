@@ -7,7 +7,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { searchCandidates } from '../../services/analyses.service';
 import { getJobPositions } from '../../services/job-positions.service';
-import type { CandidateDetail, CandidateCategory } from '../../types/analyses';
+import type { CandidateDetail, CandidateCategory, PaginationInfo } from '../../types/analyses';
 import { DownloadCVButton } from '../shared/DownloadCVButton';
 import type { JobPosition } from '../../types/job-positions';
 
@@ -48,10 +48,11 @@ const CardSkeleton = () => (
 );
 
 export const CandidatesDashboard = () => {
-  const [allCandidates, setAllCandidates] = useState<CandidateDetail[]>([]);
+  const [candidates, setCandidates] = useState<CandidateDetail[]>([]);
   const [selectedCandidate, setSelectedCandidate] = useState<CandidateDetail | null>(null);
   const [positions, setPositions] = useState<JobPosition[]>([]);
   const [loading, setLoading] = useState(true);
+  const [pagination, setPagination] = useState<PaginationInfo>({ page: 1, limit: 10, total: 0, totalPages: 0 });
 
   // Filters
   const [filterPosition, setFilterPosition] = useState<string>('');
@@ -60,26 +61,18 @@ export const CandidatesDashboard = () => {
   const [filterMaxScore, setFilterMaxScore] = useState<string>('');
 
   // Page state
-  const pageSize = 10;
   const [page, setPage] = useState(1);
 
   useEffect(() => {
     loadPositions();
   }, []);
 
-  // Re-fetch from server when server-side filters change
+  // Re-fetch from server when filters or page change
   useEffect(() => {
     fetchCandidates();
-  }, [filterPosition, filterCategory, filterMinScore, filterMaxScore]);
+  }, [filterPosition, filterCategory, filterMinScore, filterMaxScore, page]);
 
-  // Reset page when filters change
-  useEffect(() => {
-    setPage(1);
-  }, [filterPosition, filterCategory, filterMinScore, filterMaxScore]);
-
-  // Client-side pagination (backend doesn't paginate yet)
-  const totalPages = Math.ceil(allCandidates.length / pageSize);
-  const paginatedCandidates = allCandidates.slice((page - 1) * pageSize, page * pageSize);
+  const totalPages = pagination.totalPages;
 
   const loadPositions = async () => {
     try {
@@ -97,9 +90,12 @@ export const CandidatesDashboard = () => {
         category: filterCategory ? (filterCategory as CandidateCategory) : undefined,
         minScore: filterMinScore ? Number(filterMinScore) : undefined,
         maxScore: filterMaxScore ? Number(filterMaxScore) : undefined,
+        page,
+        limit: 10,
       });
       if (response.success) {
-        setAllCandidates(response.data);
+        setCandidates(response.data);
+        setPagination(response.pagination);
       }
     } catch (err) {
       console.error('Error loading candidates:', err);
@@ -334,7 +330,7 @@ export const CandidatesDashboard = () => {
         <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
           <p className="text-sm text-gray-500">
             {loading ? 'Cargando...' : (
-              <>{allCandidates.length} candidato{allCandidates.length !== 1 ? 's' : ''} encontrado{allCandidates.length !== 1 ? 's' : ''}</>
+              <>Mostrando {candidates.length} de {pagination.total} candidato{pagination.total !== 1 ? 's' : ''}</>
             )}
           </p>
           {totalPages > 1 && (
@@ -349,10 +345,10 @@ export const CandidatesDashboard = () => {
             </div>
           )}
 
-          {!loading && paginatedCandidates.length > 0 && (
+          {!loading && candidates.length > 0 && (
             <div className="space-y-2">
-              {paginatedCandidates.map((candidate, i) => {
-                const globalIndex = (page - 1) * pageSize + i;
+              {candidates.map((candidate, i) => {
+                const globalIndex = (pagination.page - 1) * pagination.limit + i;
                 const isTop1 = globalIndex === 0 && !hasActiveFilters;
                 return (
                   <div
@@ -388,7 +384,7 @@ export const CandidatesDashboard = () => {
             </div>
           )}
 
-          {!loading && allCandidates.length === 0 && (
+          {!loading && candidates.length === 0 && (
             <div className="text-center py-16">
               <svg className="w-12 h-12 text-gray-200 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />

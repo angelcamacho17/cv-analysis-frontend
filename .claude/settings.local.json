@@ -40,7 +40,12 @@
       "Bash(curl:*)",
       "WebFetch(domain:render.com)",
       "Bash(lsof:*)",
-      "Bash(git checkout:*)"
+      "Bash(git checkout:*)",
+      "WebFetch(domain:cv-analysis-frontend.onrender.com)",
+      "Bash(git:*)",
+      "Bash(npx vite:*)",
+      "Bash(npm install:*)",
+      "Bash(npm test:*)"
     ],
     "deny": [],
     "ask": []

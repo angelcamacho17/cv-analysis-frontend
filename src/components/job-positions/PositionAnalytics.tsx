@@ -11,7 +11,7 @@ import { searchCandidates } from '../../services/analyses.service';
 import { parseJobPosition } from '../../types/job-positions';
 import { DownloadCVButton } from '../shared/DownloadCVButton';
 import type { JobPositionAnalyticsResponse, JobPositionAnalysesResponse } from '../../types/job-positions';
-import type { CandidateDetail, CandidateCategory } from '../../types/analyses';
+import type { CandidateDetail, CandidateCategory, PaginationInfo } from '../../types/analyses';
 
 type CategoryFilter = 'all' | CandidateCategory;
 
@@ -21,10 +21,11 @@ export const PositionAnalytics = () => {
 
   const [analytics, setAnalytics] = useState<JobPositionAnalyticsResponse | null>(null);
   const [analyses, setAnalyses] = useState<JobPositionAnalysesResponse | null>(null);
-  const [allCandidates, setAllCandidates] = useState<CandidateDetail[]>([]);
+  const [candidates, setCandidates] = useState<CandidateDetail[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingCandidates, setLoadingCandidates] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [pagination, setPagination] = useState<PaginationInfo>({ page: 1, limit: 10, total: 0, totalPages: 0 });
 
   // Filters
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('all');
@@ -34,14 +35,19 @@ export const PositionAnalytics = () => {
 
   // Pagination
   const [page, setPage] = useState(1);
-  const pageSize = 10;
 
   useEffect(() => {
     if (id) {
       loadData(parseInt(id));
-      loadCandidates(parseInt(id));
     }
   }, [id]);
+
+  // Re-fetch candidates when filters or page change
+  useEffect(() => {
+    if (id) {
+      loadCandidates(parseInt(id));
+    }
+  }, [id, categoryFilter, analysisFilter, searchText, page]);
 
   const loadData = async (positionId: number) => {
     try {
@@ -67,9 +73,15 @@ export const PositionAnalytics = () => {
       setLoadingCandidates(true);
       const response = await searchCandidates({
         jobPositionId: positionId,
+        category: categoryFilter !== 'all' ? categoryFilter : undefined,
+        analysisId: analysisFilter || undefined,
+        name: searchText.trim() || undefined,
+        page,
+        limit: 10,
       });
       if (response.success) {
-        setAllCandidates(response.data);
+        setCandidates(response.data);
+        setPagination(response.pagination);
       }
     } catch (err) {
       console.error('Error loading candidates:', err);
@@ -78,24 +90,7 @@ export const PositionAnalytics = () => {
     }
   };
 
-  // Client-side filtering (backend doesn't support these filters with pagination yet)
-  const filteredCandidates = allCandidates.filter((c) => {
-    if (categoryFilter !== 'all' && c.categoria !== categoryFilter) return false;
-    if (analysisFilter && c.analysisId !== analysisFilter) return false;
-    if (searchText.trim()) {
-      const text = searchText.toLowerCase();
-      if (!c.nombre.toLowerCase().includes(text) && !c.email.toLowerCase().includes(text)) return false;
-    }
-    return true;
-  });
-
-  const totalPages = Math.ceil(filteredCandidates.length / pageSize);
-  const paginatedCandidates = filteredCandidates.slice((page - 1) * pageSize, page * pageSize);
-
-  // Reset page when filters change
-  useEffect(() => {
-    setPage(1);
-  }, [categoryFilter, analysisFilter, searchText]);
+  const totalPages = pagination.totalPages;
 
   const handleCategoryClick = (category: CategoryFilter) => {
     setCategoryFilter(categoryFilter === category ? 'all' : category);
@@ -327,7 +322,7 @@ export const PositionAnalytics = () => {
       <div className="bg-white rounded-xl border border-gray-200">
         <div className="p-5 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <h3 className="text-lg font-bold text-gray-900">
-            Candidatos <span className="text-sm font-normal text-gray-400">({filteredCandidates.length})</span>
+            Candidatos <span className="text-sm font-normal text-gray-400">({pagination.total})</span>
           </h3>
           <input
             type="text"
@@ -351,9 +346,9 @@ export const PositionAnalytics = () => {
               </div>
             ))}
           </div>
-        ) : paginatedCandidates.length > 0 ? (
+        ) : candidates.length > 0 ? (
           <div className="divide-y">
-            {paginatedCandidates.map((candidate, idx) => (
+            {candidates.map((candidate, idx) => (
               <div key={candidate.id || idx} className="p-6 hover:bg-gray-50 transition-colors">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
@@ -423,7 +418,7 @@ export const PositionAnalytics = () => {
           </div>
         ) : (
           <div className="p-12 text-center text-gray-500">
-            {allCandidates.length === 0
+            {pagination.total === 0
               ? 'No hay candidatos analizados para esta posicion'
               : 'No se encontraron candidatos con los filtros aplicados'}
           </div>
