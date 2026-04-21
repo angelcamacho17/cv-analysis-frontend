@@ -69,13 +69,23 @@ export const searchCandidates = async (
 
   const response = await apiGet<any>(`/candidates/search?${queryParams.toString()}`);
 
+  console.log('[searchCandidates] Raw response:', JSON.stringify(response, null, 2));
+
   // Transform snake_case backend response to camelCase frontend format
-  const defaultPagination = { page: params.page || 1, limit: params.limit || 10, total: 0, totalPages: 0 };
+  const candidates = (response.candidates || response.data || []);
+  const count = response.count ?? candidates.length;
+  const pagination = response.pagination || {
+    page: params.page || 1,
+    limit: params.limit || 10,
+    total: response.total || count,
+    totalPages: response.totalPages || Math.ceil((response.total || count) / (params.limit || 10)),
+  };
+
   return {
     success: response.success,
-    data: (response.candidates || response.data || []).map(transformCandidate),
-    count: response.count || 0,
-    pagination: response.pagination || defaultPagination,
+    data: candidates.map(transformCandidate),
+    count,
+    pagination,
   };
 };
 
