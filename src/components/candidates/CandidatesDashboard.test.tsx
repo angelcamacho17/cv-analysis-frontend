@@ -76,8 +76,6 @@ describe('CandidatesDashboard', () => {
         category: undefined,
         minScore: undefined,
         maxScore: undefined,
-        page: 1,
-        limit: 10,
       });
     });
   });
@@ -93,7 +91,7 @@ describe('CandidatesDashboard', () => {
 
     await waitFor(() => {
       expect(searchCandidates).toHaveBeenCalledWith(
-        expect.objectContaining({ jobPositionId: 1, page: 1 })
+        expect.objectContaining({ jobPositionId: 1 })
       );
     });
   });
@@ -109,7 +107,7 @@ describe('CandidatesDashboard', () => {
 
     await waitFor(() => {
       expect(searchCandidates).toHaveBeenCalledWith(
-        expect.objectContaining({ category: 'entrevistar', page: 1 })
+        expect.objectContaining({ category: 'entrevistar' })
       );
     });
   });
@@ -148,7 +146,7 @@ describe('CandidatesDashboard', () => {
 
     await waitFor(() => {
       expect(searchCandidates).toHaveBeenLastCalledWith(
-        expect.objectContaining({ category: undefined, page: 1 })
+        expect.objectContaining({ category: undefined })
       );
     });
   });
@@ -182,7 +180,7 @@ describe('CandidatesDashboard', () => {
   });
 
   it('shows pagination when multiple pages', async () => {
-    const manyCandidates = Array.from({ length: 10 }, (_, i) => ({
+    const manyCandidates = Array.from({ length: 25 }, (_, i) => ({
       ...mockCandidates[0],
       id: String(i + 10),
       nombre: `Candidate ${i}`,
@@ -191,7 +189,7 @@ describe('CandidatesDashboard', () => {
     (searchCandidates as any).mockResolvedValue({
       success: true,
       data: manyCandidates,
-      count: 10,
+      count: 25,
       pagination: { page: 1, limit: 10, total: 25, totalPages: 3 },
     });
 
@@ -203,16 +201,22 @@ describe('CandidatesDashboard', () => {
   });
 
   it('navigates pages', async () => {
+    const manyCandidates = Array.from({ length: 15 }, (_, i) => ({
+      ...mockCandidates[0],
+      id: String(i + 10),
+      nombre: `Candidate ${i}`,
+    }));
+
     (searchCandidates as any).mockResolvedValue({
       success: true,
-      data: mockCandidates,
-      count: 3,
-      pagination: { page: 1, limit: 10, total: 25, totalPages: 3 },
+      data: manyCandidates,
+      count: 15,
+      pagination: { page: 1, limit: 10, total: 15, totalPages: 2 },
     });
 
     renderDashboard();
     await waitFor(() => {
-      expect(screen.getByText('Pagina 1 de 3')).toBeInTheDocument();
+      expect(screen.getByText('Pagina 1 de 2')).toBeInTheDocument();
     });
 
     // Click page 2 button
@@ -221,9 +225,7 @@ describe('CandidatesDashboard', () => {
     fireEvent.click(page2Button!);
 
     await waitFor(() => {
-      expect(searchCandidates).toHaveBeenCalledWith(
-        expect.objectContaining({ page: 2 })
-      );
+      expect(screen.getByText('Pagina 2 de 2')).toBeInTheDocument();
     });
   });
 });

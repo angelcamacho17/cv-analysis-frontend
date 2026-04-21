@@ -7,7 +7,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { searchCandidates } from '../../services/analyses.service';
 import { getJobPositions } from '../../services/job-positions.service';
-import type { CandidateDetail, CandidateCategory, PaginationInfo } from '../../types/analyses';
+import type { CandidateDetail, CandidateCategory } from '../../types/analyses';
 import { DownloadCVButton } from '../shared/DownloadCVButton';
 import type { JobPosition } from '../../types/job-positions';
 
@@ -48,11 +48,10 @@ const CardSkeleton = () => (
 );
 
 export const CandidatesDashboard = () => {
-  const [candidates, setCandidates] = useState<CandidateDetail[]>([]);
+  const [allCandidates, setAllCandidates] = useState<CandidateDetail[]>([]);
   const [selectedCandidate, setSelectedCandidate] = useState<CandidateDetail | null>(null);
   const [positions, setPositions] = useState<JobPosition[]>([]);
   const [loading, setLoading] = useState(true);
-  const [pagination, setPagination] = useState<PaginationInfo>({ page: 1, limit: 10, total: 0, totalPages: 0 });
 
   // Filters
   const [filterPosition, setFilterPosition] = useState<string>('');
@@ -60,19 +59,21 @@ export const CandidatesDashboard = () => {
   const [filterMinScore, setFilterMinScore] = useState<string>('');
   const [filterMaxScore, setFilterMaxScore] = useState<string>('');
 
-  // Page state
+  // Pagination
+  const pageSize = 10;
   const [page, setPage] = useState(1);
+  const totalPages = Math.ceil(allCandidates.length / pageSize);
+  const candidates = allCandidates.slice((page - 1) * pageSize, page * pageSize);
 
   useEffect(() => {
     loadPositions();
   }, []);
 
-  // Re-fetch from server when filters or page change
+  // Re-fetch from server when filters change
   useEffect(() => {
     fetchCandidates();
-  }, [filterPosition, filterCategory, filterMinScore, filterMaxScore, page]);
-
-  const totalPages = pagination.totalPages;
+    setPage(1);
+  }, [filterPosition, filterCategory, filterMinScore, filterMaxScore]);
 
   const loadPositions = async () => {
     try {
@@ -90,12 +91,9 @@ export const CandidatesDashboard = () => {
         category: filterCategory ? (filterCategory as CandidateCategory) : undefined,
         minScore: filterMinScore ? Number(filterMinScore) : undefined,
         maxScore: filterMaxScore ? Number(filterMaxScore) : undefined,
-        page,
-        limit: 10,
       });
       if (response.success) {
-        setCandidates(response.data);
-        setPagination(response.pagination);
+        setAllCandidates(response.data);
       }
     } catch (err) {
       console.error('Error loading candidates:', err);
@@ -330,7 +328,7 @@ export const CandidatesDashboard = () => {
         <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
           <p className="text-sm text-gray-500">
             {loading ? 'Cargando...' : (
-              <>Mostrando {candidates.length} de {pagination.total} candidato{pagination.total !== 1 ? 's' : ''}</>
+              <>Mostrando {candidates.length} de {allCandidates.length} candidato{allCandidates.length !== 1 ? 's' : ''}</>
             )}
           </p>
           {totalPages > 1 && (
@@ -348,7 +346,7 @@ export const CandidatesDashboard = () => {
           {!loading && candidates.length > 0 && (
             <div className="space-y-2">
               {candidates.map((candidate, i) => {
-                const globalIndex = (pagination.page - 1) * pagination.limit + i;
+                const globalIndex = (page - 1) * pageSize + i;
                 const isTop1 = globalIndex === 0 && !hasActiveFilters;
                 return (
                   <div
