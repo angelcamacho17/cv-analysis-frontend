@@ -57,11 +57,20 @@ export const searchCandidates = async (
 ): Promise<CandidateSearchResponse> => {
   const queryParams = new URLSearchParams();
 
+  // Map frontend Spanish categories to backend English categories
+  const categoryToBackend: Record<string, string> = {
+    entrevistar: 'interview',
+    quizas: 'maybe',
+    descartar: 'reject',
+  };
+
   if (params.name) queryParams.append('name', params.name);
   if (params.email) queryParams.append('email', params.email);
   if (params.minScore !== undefined) queryParams.append('minScore', params.minScore.toString());
   if (params.maxScore !== undefined) queryParams.append('maxScore', params.maxScore.toString());
-  if (params.category && params.category !== 'all') queryParams.append('category', params.category);
+  if (params.category && params.category !== 'all') {
+    queryParams.append('category', categoryToBackend[params.category] || params.category);
+  }
   if (params.analysisId) queryParams.append('analysisId', params.analysisId);
   if (params.jobPositionId) queryParams.append('jobPositionId', params.jobPositionId.toString());
   if (params.page) queryParams.append('page', params.page.toString());

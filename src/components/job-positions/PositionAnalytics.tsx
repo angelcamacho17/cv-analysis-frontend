@@ -11,7 +11,7 @@ import { searchCandidates } from '../../services/analyses.service';
 import { parseJobPosition } from '../../types/job-positions';
 import { DownloadCVButton } from '../shared/DownloadCVButton';
 import type { JobPositionAnalyticsResponse, JobPositionAnalysesResponse } from '../../types/job-positions';
-import type { CandidateDetail, CandidateCategory, PaginationInfo } from '../../types/analyses';
+import type { CandidateDetail, CandidateCategory } from '../../types/analyses';
 
 type CategoryFilter = 'all' | CandidateCategory;
 
@@ -21,11 +21,10 @@ export const PositionAnalytics = () => {
 
   const [analytics, setAnalytics] = useState<JobPositionAnalyticsResponse | null>(null);
   const [analyses, setAnalyses] = useState<JobPositionAnalysesResponse | null>(null);
-  const [candidates, setCandidates] = useState<CandidateDetail[]>([]);
+  const [allCandidates, setAllCandidates] = useState<CandidateDetail[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingCandidates, setLoadingCandidates] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [pagination, setPagination] = useState<PaginationInfo>({ page: 1, limit: 10, total: 0, totalPages: 0 });
 
   // Filters
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('all');
@@ -35,19 +34,14 @@ export const PositionAnalytics = () => {
 
   // Pagination
   const [page, setPage] = useState(1);
+  const pageSize = 10;
 
   useEffect(() => {
     if (id) {
       loadData(parseInt(id));
-    }
-  }, [id]);
-
-  // Re-fetch candidates when filters or page change
-  useEffect(() => {
-    if (id) {
       loadCandidates(parseInt(id));
     }
-  }, [id, categoryFilter, analysisFilter, searchText, page]);
+  }, [id]);
 
   const loadData = async (positionId: number) => {
     try {
@@ -73,15 +67,9 @@ export const PositionAnalytics = () => {
       setLoadingCandidates(true);
       const response = await searchCandidates({
         jobPositionId: positionId,
-        category: categoryFilter !== 'all' ? categoryFilter : undefined,
-        analysisId: analysisFilter || undefined,
-        name: searchText.trim() || undefined,
-        page,
-        limit: 10,
       });
       if (response.success) {
-        setCandidates(response.data);
-        setPagination(response.pagination);
+        setAllCandidates(response.data);
       }
     } catch (err) {
       console.error('Error loading candidates:', err);
@@ -90,14 +78,31 @@ export const PositionAnalytics = () => {
     }
   };
 
+  // Client-side filtering (backend doesn't support these filters with pagination yet)
+  const filteredCandidates = allCandidates.filter((c) => {
+    if (categoryFilter !== 'all' && c.categoria !== categoryFilter) return false;
+    if (analysisFilter && c.analysisId !== analysisFilter) return false;
+    if (searchText.trim()) {
+      const text = searchText.toLowerCase();
+      if (!c.nombre.toLowerCase().includes(text) && !c.email.toLowerCase().includes(text)) return false;
+    }
+    return true;
+  });
+
+  const totalPages = Math.ceil(filteredCandidates.length / pageSize);
+  const paginatedCandidates = filteredCandidates.slice((page - 1) * pageSize, page * pageSize);
+
+  // Reset page when filters change
+  useEffect(() => {
+    setPage(1);
+  }, [categoryFilter, analysisFilter, searchText]);
+
   const handleCategoryClick = (category: CategoryFilter) => {
     setCategoryFilter(categoryFilter === category ? 'all' : category);
-    setPage(1);
   };
 
   const handleAnalysisClick = (analysisId: string) => {
     setAnalysisFilter(analysisFilter === analysisId ? '' : analysisId);
-    setPage(1);
   };
 
   const getScoreColor = (score: number): string => {
@@ -310,7 +315,7 @@ export const PositionAnalytics = () => {
             </button>
           )}
           <button
-            onClick={() => { setCategoryFilter('all'); setAnalysisFilter(''); setSearchText(''); setPage(1); }}
+            onClick={() => { setCategoryFilter('all'); setAnalysisFilter(''); setSearchText(''); }}
             className="px-3 py-1 text-xs text-gray-500 hover:text-gray-700 underline"
           >
             Limpiar todos
@@ -322,12 +327,12 @@ export const PositionAnalytics = () => {
       <div className="bg-white rounded-xl border border-gray-200">
         <div className="p-5 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <h3 className="text-lg font-bold text-gray-900">
-            Candidatos <span className="text-sm font-normal text-gray-400">({pagination.total})</span>
+            Candidatos <span className="text-sm font-normal text-gray-400">({filteredCandidates.length})</span>
           </h3>
           <input
             type="text"
             value={searchText}
-            onChange={(e) => { setSearchText(e.target.value); setPage(1); }}
+            onChange={(e) => setSearchText(e.target.value)}
             placeholder="Buscar por nombre o email..."
             className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:w-64"
           />
@@ -346,9 +351,9 @@ export const PositionAnalytics = () => {
               </div>
             ))}
           </div>
-        ) : candidates.length > 0 ? (
+        ) : paginatedCandidates.length > 0 ? (
           <div className="divide-y">
-            {candidates.map((candidate, idx) => (
+            {paginatedCandidates.map((candidate, idx) => (
               <div key={candidate.id || idx} className="p-6 hover:bg-gray-50 transition-colors">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
@@ -418,28 +423,28 @@ export const PositionAnalytics = () => {
           </div>
         ) : (
           <div className="p-12 text-center text-gray-500">
-            {candidates.length === 0
+            {allCandidates.length === 0
               ? 'No hay candidatos analizados para esta posicion'
               : 'No se encontraron candidatos con los filtros aplicados'}
           </div>
         )}
 
         {/* Pagination */}
-        {pagination.totalPages > 1 && (
+        {totalPages > 1 && (
           <div className="p-4 border-t border-gray-100 flex items-center justify-center gap-2">
             <button
               onClick={() => setPage(p => Math.max(1, p - 1))}
-              disabled={pagination.page <= 1}
+              disabled={page <= 1}
               className="px-4 py-2 border rounded-lg text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Anterior
             </button>
             <span className="px-4 py-2 text-sm text-gray-700">
-              Mostrando {candidates.length} de {pagination.total} &middot; Pagina {pagination.page} de {pagination.totalPages}
+              Pagina {page} de {totalPages}
             </span>
             <button
-              onClick={() => setPage(p => Math.min(pagination.totalPages, p + 1))}
-              disabled={pagination.page >= pagination.totalPages}
+              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+              disabled={page >= totalPages}
               className="px-4 py-2 border rounded-lg text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Siguiente
