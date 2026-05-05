@@ -76,6 +76,8 @@ describe('CandidatesDashboard', () => {
         category: undefined,
         minScore: undefined,
         maxScore: undefined,
+        page: 1,
+        limit: 10,
       });
     });
   });
@@ -180,7 +182,8 @@ describe('CandidatesDashboard', () => {
   });
 
   it('shows pagination when multiple pages', async () => {
-    const manyCandidates = Array.from({ length: 25 }, (_, i) => ({
+    // Server returns only the current page slice (10 candidates) but reports total=25.
+    const pageSlice = Array.from({ length: 10 }, (_, i) => ({
       ...mockCandidates[0],
       id: String(i + 10),
       nombre: `Candidate ${i}`,
@@ -188,8 +191,8 @@ describe('CandidatesDashboard', () => {
 
     (searchCandidates as any).mockResolvedValue({
       success: true,
-      data: manyCandidates,
-      count: 25,
+      data: pageSlice,
+      count: 10,
       pagination: { page: 1, limit: 10, total: 25, totalPages: 3 },
     });
 
@@ -201,18 +204,28 @@ describe('CandidatesDashboard', () => {
   });
 
   it('navigates pages', async () => {
-    const manyCandidates = Array.from({ length: 15 }, (_, i) => ({
+    const page1 = Array.from({ length: 10 }, (_, i) => ({
       ...mockCandidates[0],
       id: String(i + 10),
-      nombre: `Candidate ${i}`,
+      nombre: `Candidate p1-${i}`,
+    }));
+    const page2 = Array.from({ length: 5 }, (_, i) => ({
+      ...mockCandidates[0],
+      id: String(i + 100),
+      nombre: `Candidate p2-${i}`,
     }));
 
-    (searchCandidates as any).mockResolvedValue({
+    (searchCandidates as any).mockImplementation(async (params: any) => ({
       success: true,
-      data: manyCandidates,
-      count: 15,
-      pagination: { page: 1, limit: 10, total: 15, totalPages: 2 },
-    });
+      data: params.page === 2 ? page2 : page1,
+      count: params.page === 2 ? 5 : 10,
+      pagination: {
+        page: params.page ?? 1,
+        limit: 10,
+        total: 15,
+        totalPages: 2,
+      },
+    }));
 
     renderDashboard();
     await waitFor(() => {
@@ -227,5 +240,10 @@ describe('CandidatesDashboard', () => {
     await waitFor(() => {
       expect(screen.getByText('Pagina 2 de 2')).toBeInTheDocument();
     });
+
+    // Confirm the server call for page 2 actually went out.
+    expect(searchCandidates).toHaveBeenLastCalledWith(
+      expect.objectContaining({ page: 2, limit: 10 })
+    );
   });
 });

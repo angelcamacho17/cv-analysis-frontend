@@ -48,7 +48,9 @@ const CardSkeleton = () => (
 );
 
 export const CandidatesDashboard = () => {
-  const [allCandidates, setAllCandidates] = useState<CandidateDetail[]>([]);
+  const [candidates, setCandidates] = useState<CandidateDetail[]>([]);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
   const [selectedCandidate, setSelectedCandidate] = useState<CandidateDetail | null>(null);
   const [positions, setPositions] = useState<JobPosition[]>([]);
   const [loading, setLoading] = useState(true);
@@ -62,18 +64,49 @@ export const CandidatesDashboard = () => {
   // Pagination
   const pageSize = 10;
   const [page, setPage] = useState(1);
-  const totalPages = Math.ceil(allCandidates.length / pageSize);
-  const candidates = allCandidates.slice((page - 1) * pageSize, page * pageSize);
 
   useEffect(() => {
     loadPositions();
   }, []);
 
-  // Re-fetch from server when filters change
+  // Reset to page 1 whenever filters change. The fetch effect below sees the
+  // same change and re-fetches with page=1.
   useEffect(() => {
-    fetchCandidates();
     setPage(1);
   }, [filterPosition, filterCategory, filterMinScore, filterMaxScore]);
+
+  // Re-fetch when filters or page change. Cancellation guards against
+  // out-of-order responses overwriting fresh state.
+  useEffect(() => {
+    let cancelled = false;
+    const run = async () => {
+      setLoading(true);
+      try {
+        const response = await searchCandidates({
+          jobPositionId: filterPosition ? Number(filterPosition) : undefined,
+          category: filterCategory ? (filterCategory as CandidateCategory) : undefined,
+          minScore: filterMinScore ? Number(filterMinScore) : undefined,
+          maxScore: filterMaxScore ? Number(filterMaxScore) : undefined,
+          page,
+          limit: pageSize,
+        });
+        if (cancelled) return;
+        if (response.success) {
+          setCandidates(response.data);
+          setTotal(response.pagination?.total ?? response.data.length);
+          setTotalPages(response.pagination?.totalPages ?? 1);
+        }
+      } catch (err) {
+        if (!cancelled) console.error('Error loading candidates:', err);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    run();
+    return () => {
+      cancelled = true;
+    };
+  }, [filterPosition, filterCategory, filterMinScore, filterMaxScore, page]);
 
   const loadPositions = async () => {
     try {
@@ -83,31 +116,11 @@ export const CandidatesDashboard = () => {
     }
   };
 
-  const fetchCandidates = async () => {
-    setLoading(true);
-    try {
-      const response = await searchCandidates({
-        jobPositionId: filterPosition ? Number(filterPosition) : undefined,
-        category: filterCategory ? (filterCategory as CandidateCategory) : undefined,
-        minScore: filterMinScore ? Number(filterMinScore) : undefined,
-        maxScore: filterMaxScore ? Number(filterMaxScore) : undefined,
-      });
-      if (response.success) {
-        setAllCandidates(response.data);
-      }
-    } catch (err) {
-      console.error('Error loading candidates:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const clearFilters = () => {
     setFilterPosition('');
     setFilterCategory('');
     setFilterMinScore('');
     setFilterMaxScore('');
-    setPage(1);
   };
 
   const viewCandidateDetail = (candidate: CandidateDetail) => {
@@ -259,7 +272,7 @@ export const CandidatesDashboard = () => {
             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Posicion</label>
             <select
               value={filterPosition}
-              onChange={(e) => { setFilterPosition(e.target.value); setPage(1); }}
+              onChange={(e) => setFilterPosition(e.target.value)}
               className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white transition-colors"
             >
               <option value="">Todas las posiciones</option>
@@ -272,7 +285,7 @@ export const CandidatesDashboard = () => {
             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Categoria</label>
             <select
               value={filterCategory}
-              onChange={(e) => { setFilterCategory(e.target.value); setPage(1); }}
+              onChange={(e) => setFilterCategory(e.target.value)}
               className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white transition-colors"
             >
               <option value="">Todas</option>
@@ -289,7 +302,7 @@ export const CandidatesDashboard = () => {
               <input
                 type="number"
                 value={filterMinScore}
-                onChange={(e) => { setFilterMinScore(e.target.value); setPage(1); }}
+                onChange={(e) => setFilterMinScore(e.target.value)}
                 min="0"
                 max="100"
                 placeholder="Min"
@@ -299,7 +312,7 @@ export const CandidatesDashboard = () => {
               <input
                 type="number"
                 value={filterMaxScore}
-                onChange={(e) => { setFilterMaxScore(e.target.value); setPage(1); }}
+                onChange={(e) => setFilterMaxScore(e.target.value)}
                 min="0"
                 max="100"
                 placeholder="Max"
@@ -328,7 +341,7 @@ export const CandidatesDashboard = () => {
         <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
           <p className="text-sm text-gray-500">
             {loading ? 'Cargando...' : (
-              <>Mostrando {candidates.length} de {allCandidates.length} candidato{allCandidates.length !== 1 ? 's' : ''}</>
+              <>Mostrando {candidates.length} de {total} candidato{total !== 1 ? 's' : ''}</>
             )}
           </p>
           {totalPages > 1 && (
