@@ -29,6 +29,7 @@ export const analyzeCVWithProgress = async (
   try {
     const formData = new FormData();
     formData.append('jobPositionId', String(jobPositionId));
+    formData.append('language', 'es');
     cvFiles.forEach((cv) => formData.append('cvs', cv));
 
     const token = localStorage.getItem('cv_analysis_token');
@@ -117,6 +118,7 @@ export const analyzeCV = async (
 ): Promise<AnalysisResult> => {
   const formData = new FormData();
   formData.append('jobPositionId', String(jobPositionId));
+  formData.append('language', 'es');
   cvFiles.forEach((cv) => formData.append('cvs', cv));
 
   const response = await apiFetch(`/analyze`, {

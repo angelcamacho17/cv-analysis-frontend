@@ -112,6 +112,32 @@ describe('CVAnalysisPage', () => {
     });
   });
 
+  it('rejects PDFs larger than 4 MB and names them in the error', async () => {
+    renderPage();
+    await waitFor(() => {
+      expect(document.querySelector('input[type="file"]')).toBeInTheDocument();
+    });
+
+    const tooBig = new File([new ArrayBuffer(4 * 1024 * 1024 + 1)], 'huge.pdf', { type: 'application/pdf' });
+    const ok = new File(['ok'], 'small.pdf', { type: 'application/pdf' });
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+
+    Object.defineProperty(input, 'files', { value: [tooBig, ok] });
+    fireEvent.change(input);
+
+    // Oversized file is named in the error message and not added to the list.
+    await waitFor(() => {
+      expect(screen.getByText(/No se pudo cargar el siguiente CV.*huge\.pdf/)).toBeInTheDocument();
+    });
+    // Accepted file still shows up.
+    expect(screen.getByText('small.pdf')).toBeInTheDocument();
+    // Rejected file does NOT appear in the file list (it appears in the error blurb only,
+    // which lives outside the file list container).
+    const fileListItems = document.querySelectorAll('.max-h-48 .truncate');
+    const listed = Array.from(fileListItems).map(el => el.textContent);
+    expect(listed).not.toContain('huge.pdf');
+  });
+
   // -------- End-to-end analysis flow (Layer 3 of test plan) --------
   // These exercise the full chain: mocked SSE final event -> transformer -> rendered DOM.
   // They are the regression tests for the "summary all zeros" bug.

@@ -93,12 +93,24 @@ export const CVAnalysisPage = () => {
   const canAnalyze = pdfFiles.length > 0 && !!selectedPositionId;
 
   // File handling
-  const addFiles = useCallback((files: File[]) => {
-    const validFiles = files.filter(f => f.name.toLowerCase().endsWith('.pdf'));
-    const invalidCount = files.length - validFiles.length;
+  const MAX_FILE_SIZE_BYTES = 4 * 1024 * 1024; // 4 MB per CV
 
-    if (invalidCount > 0) {
-      setError(`${invalidCount} archivo(s) ignorado(s) - solo se permiten PDFs`);
+  const addFiles = useCallback((files: File[]) => {
+    const pdfs = files.filter(f => f.name.toLowerCase().endsWith('.pdf'));
+    const nonPdfCount = files.length - pdfs.length;
+
+    const oversized = pdfs.filter(f => f.size > MAX_FILE_SIZE_BYTES);
+    const validFiles = pdfs.filter(f => f.size <= MAX_FILE_SIZE_BYTES);
+
+    const messages: string[] = [];
+    if (nonPdfCount > 0) {
+      messages.push(`${nonPdfCount} archivo(s) ignorado(s) - solo se permiten PDFs`);
+    }
+    if (oversized.length > 0) {
+      const names = oversized.map(f => `${f.name} (${formatFileSize(f.size)})`).join(', ');
+      messages.push(
+        `No se pudo cargar ${oversized.length === 1 ? 'el siguiente CV' : 'los siguientes CVs'} por superar el limite de 4 MB: ${names}`
+      );
     }
 
     setPdfFiles(prev => {
@@ -107,7 +119,11 @@ export const CVAnalysisPage = () => {
         setError('Maximo 50 archivos PDF permitidos');
         return prev;
       }
-      if (validFiles.length > 0) setError(null);
+      if (messages.length > 0) {
+        setError(messages.join('. '));
+      } else if (validFiles.length > 0) {
+        setError(null);
+      }
       return combined;
     });
   }, []);
@@ -430,7 +446,7 @@ export const CVAnalysisPage = () => {
                   <p className="text-sm font-medium text-gray-700 mb-1">
                     Arrastra archivos PDF aqui o haz clic para seleccionar
                   </p>
-                  <p className="text-xs text-gray-400">Maximo 50 archivos PDF</p>
+                  <p className="text-xs text-gray-400">Maximo 50 archivos PDF · 4 MB por archivo</p>
                 </div>
               ) : (
                 <div>
